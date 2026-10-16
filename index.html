@@ -1,0 +1,1570 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#110e17">
+<meta name="description" content="Rispondi a cinque domande e scopri cosa guardare stasera, da solo o votando con gli amici.">
+<title>Cosa Guardiamo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='10' r='7' fill='none' stroke='%23f4b740' stroke-width='2.4'/%3E%3Ccircle cx='23' cy='10' r='5' fill='none' stroke='%23f4b740' stroke-width='2.4'/%3E%3Crect x='4' y='18' width='18' height='10' rx='2' fill='%23f4b740'/%3E%3Cpath d='M22 21l7-3v10l-7-3z' fill='%23f4b740'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: una sola colonna stretta, come lo schermo in fondo a una sala buia; ogni schermata sostituisce la precedente. Look scuro scelto di proposito (la sala), quindi tema unico. */
+:root{
+  color-scheme: dark;
+  --bg:#110e17; --bg-glow:rgba(244,183,64,.09);
+  --surface:#1c1726; --surface-2:#251f32; --line:#342c43;
+  --fg:#f3eee6; --muted:#aba2b8; --dim:#7a7189;
+  --amber:#f4b740; --amber-soft:rgba(244,183,64,.14); --amber-ink:#2b1b00;
+  --yes:#3fcfa6; --yes-soft:rgba(63,207,166,.16);
+  --no:#ff7070; --no-soft:rgba(255,112,112,.16);
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(110% 55% at 50% -12%, var(--bg-glow), transparent 62%);
+  background-attachment:fixed;
+  color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:8px}
+
+.app{
+  max-width:580px; margin:0 auto; min-height:100%;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:18px 56px;
+  display:flex; flex-direction:column; gap:22px;
+}
+
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;
+  font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase}
+.brand svg{width:28px;height:28px}
+.room-chip{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.12em;
+  padding:6px 10px;border-radius:999px;background:var(--amber-soft);color:var(--amber);border:1px solid rgba(244,183,64,.3)}
+
+.view{display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(56px,16vw,92px);line-height:.88;text-transform:uppercase;letter-spacing:.005em}
+h1 em{font-style:normal;color:var(--amber)}
+h2{font-family:var(--display);font-weight:800;font-size:clamp(34px,9vw,46px);line-height:.95;text-transform:uppercase}
+.lead{color:var(--muted);margin:0;max-width:46ch}
+p{margin:0}
+
+/* home tiles */
+.tiles{display:grid;gap:12px}
+.tile{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 14px;text-align:left;
+  padding:18px 18px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);transition:border-color .15s, transform .15s}
+.tile:hover:not(:disabled){border-color:var(--amber);transform:translateY(-1px)}
+.tile:disabled{opacity:.5;cursor:not-allowed}
+.tile strong{font-family:var(--display);font-weight:800;font-size:28px;text-transform:uppercase;line-height:1}
+.tile span{color:var(--muted);font-size:14.5px;grid-column:1}
+.tile .arrow{grid-row:1/3;grid-column:2;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--amber);color:var(--amber-ink);font-weight:700}
+.tile.primary{background:linear-gradient(135deg, var(--surface-2), var(--surface));}
+
+.join{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.join label{font-size:14px;color:var(--muted)}
+.join-row{display:flex;gap:10px}
+.code-input{flex:1;min-width:0;font-family:var(--mono);font-weight:700;font-size:22px;letter-spacing:.3em;text-transform:uppercase;
+  padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.code-input::placeholder{color:var(--dim);letter-spacing:.3em}
+.code-input:focus{outline:none;border-color:var(--amber)}
+.note{font-size:13.5px;color:var(--dim)}
+.err{font-size:14px;color:var(--no)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:12px;border:1px solid var(--line);
+  background:var(--surface);font-weight:600;font-size:15.5px;text-decoration:none;color:var(--fg);transition:background .15s,border-color .15s}
+.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn.gold{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
+.btn.gold:hover:not(:disabled){filter:brightness(1.06)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px}
+.btn-row .btn{flex:1 1 auto}
+
+/* quiz */
+.qhead{display:flex;flex-direction:column;gap:10px}
+.progress{height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--amber);transition:width .3s ease}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{text-align:left;padding:14px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);
+  display:flex;flex-direction:column;gap:2px;min-height:72px;justify-content:center;transition:border-color .15s, background .15s}
+.opt b{font-weight:700;font-size:16.5px}
+.opt small{color:var(--muted);font-size:13px;line-height:1.35}
+.opt[aria-pressed="true"]{border-color:var(--amber);background:var(--amber-soft)}
+.opt[aria-pressed="true"] b{color:var(--amber)}
+.opt:hover{border-color:var(--muted)}
+.opts .opt:last-child:nth-child(odd){grid-column:1/-1}
+.qnav{display:flex;gap:10px;justify-content:space-between}
+
+/* poster (generated, typographic) */
+.poster{position:relative;overflow:hidden;color:#fff;
+  background:
+    radial-gradient(circle at 25% 18%, hsl(var(--h) 85% 62% / .55), transparent 52%),
+    radial-gradient(circle at 90% 85%, hsl(calc(var(--h) + 50) 70% 45% / .45), transparent 55%),
+    linear-gradient(165deg, hsl(var(--h) 50% 26%), hsl(calc(var(--h) + 30) 45% 10%));
+}
+.poster::before,.poster::after{content:"";position:absolute;left:0;right:0;height:14px;
+  background:repeating-linear-gradient(90deg, transparent 0 6px, rgba(0,0,0,.55) 6px 14px, transparent 14px 20px);opacity:.55}
+.poster::before{top:6px}
+.poster::after{bottom:6px}
+
+/* results */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.chip.gold{color:var(--amber);border-color:rgba(244,183,64,.35);background:var(--amber-soft)}
+.list{display:flex;flex-direction:column;gap:12px}
+.fcard{display:grid;grid-template-columns:92px 1fr;gap:14px;padding:12px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.fcard .poster{border-radius:8px;aspect-ratio:2/3;display:flex;align-items:flex-end;padding:22px 7px;
+  font-family:var(--display);font-weight:800;font-size:15px;line-height:.95;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.fbody{min-width:0;display:flex;flex-direction:column;gap:6px}
+.fbody h3{font-size:18px;font-weight:700;line-height:1.2}
+.meta{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.02em}
+.fbody p{font-size:14.5px;color:var(--muted)}
+.where{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13.5px;margin-top:2px}
+.platform{font-weight:700;color:var(--fg)}
+.jw{color:var(--amber);font-weight:600;text-decoration:none}
+.jw:hover{text-decoration:underline}
+
+/* lobby marquee */
+.marquee{position:relative;border-radius:18px;padding:12px;
+  background:radial-gradient(circle, var(--amber) 2.3px, transparent 3px) 0 0/16px 16px, var(--surface-2);}
+.marquee-in{border-radius:10px;background:var(--bg);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.code{font-family:var(--display);font-weight:900;font-size:clamp(64px,20vw,104px);line-height:.9;letter-spacing:.12em;color:var(--amber);
+  text-shadow:0 0 24px rgba(244,183,64,.35);padding-left:.12em}
+@media (prefers-reduced-motion:no-preference){
+  .marquee{animation:bulbs 1.6s steps(2) infinite}
+  @keyframes bulbs{50%{background-position:8px 8px, 0 0}}
+}
+.steps{display:grid;gap:10px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;color:var(--muted);font-size:15px}
+.steps li::before{counter-increment:s;content:counter(s);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--mono);font-size:12px;font-weight:700;background:var(--surface-2);color:var(--amber);margin-top:1px}
+
+.people{display:flex;flex-direction:column;gap:8px}
+.person{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.av{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:13px;
+  background:hsl(var(--ah,40) 55% 38%);color:#fff}
+.mini-people .av{width:20px;height:20px;font-size:10.5px}
+.text-input{width:100%;min-width:0;font-size:17px;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.text-input:focus{outline:none;border-color:var(--amber)}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:14px;color:var(--muted)}
+.credits{font-size:12.5px;color:var(--dim);text-align:center;margin-top:12px}
+.credits a{color:var(--muted)}
+.person .nm{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person .tag{font-family:var(--mono);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.person .tag.ok{color:var(--yes)}
+
+/* voting */
+.vhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.counter{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mini-people{display:flex;flex-wrap:wrap;gap:6px}
+.mini-people .mp{display:flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 9px 3px 3px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.stack{position:relative;height:min(58vh,520px);aspect-ratio:2/3;max-width:100%;margin-inline:auto}
+.card{position:absolute;inset:0;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.45);touch-action:pan-y;user-select:none;-webkit-user-select:none;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:30px 20px 34px;transition:transform .25s ease, opacity .25s ease}
+.card.dragging{transition:none;cursor:grabbing}
+.card.under{transform:scale(.94) translateY(14px);opacity:.55;pointer-events:none}
+.card .ctitle,.ticket .poster .ctitle,.fcard .poster{overflow-wrap:anywhere;hyphens:auto}
+.card .ctitle{font-family:var(--display);font-weight:900;font-size:clamp(36px,10vw,50px);line-height:.9;text-transform:uppercase;text-shadow:0 2px 18px rgba(0,0,0,.45)}
+.card .orig{font-size:14px;opacity:.8;font-style:italic;margin-top:-4px}
+.card .cmeta{font-family:var(--mono);font-size:12.5px;opacity:.85}
+.card .cblurb{font-size:15px;line-height:1.4;opacity:.92;max-width:34ch}
+.card .ctags{display:flex;flex-wrap:wrap;gap:6px}
+.card .ctags span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.2)}
+.stamp{position:absolute;top:34px;font-family:var(--display);font-weight:900;font-size:44px;letter-spacing:.06em;padding:2px 14px;border:4px solid;border-radius:10px;opacity:0;pointer-events:none}
+.stamp.yes{left:18px;color:var(--yes);border-color:var(--yes);transform:rotate(-12deg);opacity:var(--yes-o,0)}
+.stamp.no{right:18px;color:var(--no);border-color:var(--no);transform:rotate(12deg);opacity:var(--no-o,0)}
+.vbtns{display:flex;justify-content:center;gap:28px}
+.vbtn{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;border:2px solid;background:var(--surface);transition:transform .12s, background .15s}
+.vbtn svg{width:30px;height:30px}
+.vbtn:active{transform:scale(.92)}
+.vbtn.no{color:var(--no);border-color:var(--no)}
+.vbtn.no:hover{background:var(--no-soft)}
+.vbtn.yes{color:var(--yes);border-color:var(--yes)}
+.vbtn.yes:hover{background:var(--yes-soft)}
+.hint-keys{text-align:center;font-size:12.5px;color:var(--dim)}
+
+/* waiting */
+.panel{padding:18px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+
+/* match / ticket */
+.ticket{display:grid;grid-template-columns:1fr;border-radius:18px;overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.ticket .poster{min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:30px 20px 30px}
+.ticket .poster .ctitle{font-family:var(--display);font-weight:900;font-size:clamp(44px,13vw,64px);line-height:.88;text-transform:uppercase;text-shadow:0 2px 18px rgba(0,0,0,.45)}
+.ticket .stub{position:relative;padding:20px;display:flex;flex-direction:column;gap:12px;border-top:2px dashed var(--line)}
+.ticket .stub::before,.ticket .stub::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--bg)}
+.ticket .stub::before{left:-13px}
+.ticket .stub::after{right:-13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14.5px}
+.kv dt{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding-top:2px}
+.kv dd{margin:0;min-width:0}
+.big-where{font-size:20px;font-weight:700}
+@media (prefers-reduced-motion:no-preference){
+  .reveal{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes rise{from{transform:translateY(24px) scale(.97);opacity:.2}}
+}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100% - 32px);
+  padding:12px 16px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:14.5px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:20}
+.center{text-align:center}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--amber);animation:sp 1s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (max-width:380px){.opts{grid-template-columns:1fr}.opts .opt:last-child:nth-child(odd){grid-column:auto}.fcard{grid-template-columns:76px 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <button class="brand" id="brand" type="button" aria-label="Torna all'inizio">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke="#f4b740" stroke-width="2.4"/><circle cx="23" cy="10" r="5" stroke="#f4b740" stroke-width="2.4"/><rect x="4" y="18" width="18" height="10" rx="2" fill="#f4b740"/><path d="M22 21l7-3v10l-7-3z" fill="#f4b740"/></svg>
+      Cosa Guardiamo
+    </button>
+    <span class="room-chip" id="roomChip" hidden></span>
+  </div>
+
+  <!-- HOME -->
+  <section class="view" id="v-home">
+    <div class="eyebrow" id="homeEyebrow">Sala buia · film in programmazione</div>
+    <h1>Cosa<br>guardiamo<br><em>stasera?</em></h1>
+    <p class="lead">Rispondi a cinque domande, anche con più scelte, e ti propongo i film giusti, comprese le novità in streaming in Italia. Oppure crea una serata di gruppo: tutti votano sì o no, e vince il primo film che piace a tutti.</p>
+    <div class="tiles">
+      <button class="tile primary" id="goSolo" type="button">
+        <strong>Scelgo io</strong>
+        <span>Cinque domande, almeno 20 proposte su misura</span>
+        <i class="arrow" aria-hidden="true">→</i>
+      </button>
+      <button class="tile" id="goGroup" type="button">
+        <strong>Serata di gruppo</strong>
+        <span>Crei un codice, gli altri entrano, votate 30 film</span>
+        <i class="arrow" aria-hidden="true">→</i>
+      </button>
+    </div>
+    <form class="join" id="joinForm" autocomplete="off">
+      <div class="field">
+        <label for="nickInput">Il tuo soprannome per le serate di gruppo</label>
+        <input class="text-input" id="nickInput" maxlength="24" placeholder="Es. Giulia" autocomplete="nickname">
+      </div>
+      <label for="codeInput">Hai già un codice?</label>
+      <div class="join-row">
+        <input class="code-input" id="codeInput" maxlength="5" placeholder="ABCDE" inputmode="text" autocapitalize="characters" spellcheck="false">
+        <button class="btn gold" id="joinBtn" type="submit">Entra</button>
+      </div>
+      <p class="err" id="joinErr" hidden></p>
+      <p class="note" id="groupNote" hidden></p>
+    </form>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="view" id="v-quiz" hidden>
+    <div class="qhead">
+      <div class="eyebrow" id="qCount">Domanda 1 di 5</div>
+      <div class="progress"><i id="qBar" style="width:20%"></i></div>
+    </div>
+    <h2 id="qTitle"></h2>
+    <p class="lead" id="qHint"></p>
+    <div class="opts" id="qOpts"></div>
+    <div class="qnav">
+      <button class="btn ghost" id="qBack" type="button">Indietro</button>
+      <button class="btn gold" id="qNext" type="button" disabled>Avanti</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="view" id="v-results" hidden>
+    <div class="eyebrow">Le tue proposte</div>
+    <h2>Stasera in sala</h2>
+    <div class="chips" id="resChips"></div>
+    <p class="note" id="resCount"></p>
+    <div class="list" id="resList"></div>
+    <div class="btn-row">
+      <button class="btn" id="resMore" type="button">Altre dieci proposte</button>
+      <button class="btn ghost" id="resRedo" type="button">Rifai le domande</button>
+    </div>
+    <div class="field" id="resGroup">
+      <label for="resNick">Il tuo soprannome, per far votare il gruppo su questi gusti</label>
+      <input class="text-input" id="resNick" maxlength="24" placeholder="Es. Giulia" autocomplete="nickname">
+      <p class="err" id="resErr" hidden></p>
+      <button class="btn gold" id="resToGroup" type="button">Fai votare il gruppo su questi gusti</button>
+    </div>
+  </section>
+
+  <!-- LOBBY -->
+  <section class="view" id="v-lobby" hidden>
+    <div class="eyebrow">Serata di gruppo</div>
+    <div class="marquee"><div class="marquee-in">
+      <span class="eyebrow">Codice della serata</span>
+      <div class="code" id="lobbyCode">-----</div>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn gold" id="copyInvite" type="button">Invia l'invito</button>
+        <button class="btn ghost" id="copyCode" type="button">Copia codice</button>
+      </div>
+    </div></div>
+    <ol class="steps">
+      <li><span>Tocca <b>Invia l'invito</b> e manda il link nel gruppo: il codice è già dentro.</span></li>
+      <li><span>Gli amici aprono il link, scrivono un soprannome e toccano <b>Entra</b>. Nessuna registrazione.</span></li>
+      <li><span>Quando ci siete tutti, chi ha creato la serata avvia il voto su 30 film.</span></li>
+    </ol>
+    <div class="chips" id="lobbyChips"></div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px" id="lobbyCount">In sala</div>
+      <div class="people" id="lobbyPeople"></div>
+    </div>
+    <button class="btn gold" id="startVote" type="button" hidden>Inizia la votazione</button>
+    <p class="note center" id="lobbyWait" hidden>Aspettiamo che chi ha creato la serata avvii il voto.</p>
+    <button class="btn ghost" id="leaveLobby" type="button">Esci dalla serata</button>
+  </section>
+
+  <!-- VOTE -->
+  <section class="view" id="v-vote" hidden>
+    <div class="vhead">
+      <div class="eyebrow">Sì o no?</div>
+      <div class="counter" id="voteCounter">1 / 30</div>
+    </div>
+    <div class="progress"><i id="voteBar" style="width:0%"></i></div>
+    <div class="mini-people" id="votePeople"></div>
+    <div class="stack" id="stack"></div>
+    <div class="vbtns">
+      <button class="vbtn no" id="btnNo" type="button" aria-label="No">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <button class="vbtn yes" id="btnYes" type="button" aria-label="Sì">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>
+      </button>
+    </div>
+    <p class="hint-keys">Trascina la locandina o usa le frecce ← →</p>
+  </section>
+
+  <!-- WAIT -->
+  <section class="view" id="v-wait" hidden>
+    <div class="eyebrow">Hai votato tutto</div>
+    <h2>Ancora nessun film per tutti</h2>
+    <p class="lead">Appena tutti finiscono, se nessun film ha preso solo sì, esce quello con più voti favorevoli.</p>
+    <div class="panel">
+      <div class="eyebrow">Avanzamento</div>
+      <div class="people" id="waitPeople"></div>
+    </div>
+  </section>
+
+  <!-- MATCH -->
+  <section class="view" id="v-match" hidden>
+    <div class="eyebrow" id="matchEyebrow">Abbiamo un film</div>
+    <h2 id="matchTitle">Si guarda questo</h2>
+    <div class="ticket reveal" id="matchTicket"></div>
+    <div class="btn-row">
+      <button class="btn gold" id="newNight" type="button">Nuova serata</button>
+    </div>
+  </section>
+
+  <p class="credits">Dove vederlo: link a <a href="https://www.justwatch.com/it" target="_blank" rel="noopener">JustWatch</a>. Disponibilità verificate a ottobre 2026, aggiornate ogni settimana.</p>
+
+  <!-- LOADING -->
+  <section class="view" id="v-loading" hidden>
+    <div class="panel center"><div class="spin"></div><p class="note" id="loadingMsg">Un attimo…</p></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+/* =====================================================================
+   CONFIGURAZIONE · incolla qui i dati del tuo progetto Supabase
+   (Project Settings → API). Usa la chiave PUBBLICA (publishable / anon),
+   mai la secret / service_role.
+   ===================================================================== */
+const SUPABASE_URL = "https://txcpawjascovosbeumru.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TQHeVbbhr_5eZVejZgtS-Q_KqBvj6w5";
+
+/* ---------- Catalogo ---------- */
+/* [titolo, titolo originale, anno, regia, minuti, umori, adatto a famiglie, notorietà 0-2, piattaforma, trama breve]
+   Umori: R ridere, E emozionarsi, A adrenalina, B brivido, P pensare, S evadere, L romanticismo
+   Piattaforma solo per produzioni proprie: N Netflix, D Disney+, A Apple TV+ */
+const RAW = [
+["Il favoloso mondo di Amélie","Le Fabuleux Destin d'Amélie Poulain",2001,"Jean-Pierre Jeunet",122,"SLR",0,2,"","Una cameriera di Montmartre decide di aggiustare di nascosto la vita degli altri."],
+["Ritorno al futuro","Back to the Future",1985,"Robert Zemeckis",116,"RAS",1,2,"","Marty finisce nel 1955 con una DeLorean e rischia di cancellare la propria nascita."],
+["Parasite","Gisaengchung",2019,"Bong Joon-ho",132,"BPA",0,2,"","Una famiglia povera si infiltra, un impiego alla volta, nella villa di una famiglia ricca."],
+["Coco","",2017,"Lee Unkrich",105,"ESR",1,2,"D","Un ragazzino messicano finisce nella Terra dei Morti inseguendo il sogno della musica."],
+["Inside Out","",2015,"Pete Docter",95,"ERS",1,2,"D","Gioia, Tristezza e le altre emozioni nella testa di una ragazzina che cambia città."],
+["Up","",2009,"Pete Docter",96,"ERS",1,2,"D","Un vedovo burbero lega migliaia di palloncini alla casa e parte per il Sud America."],
+["La città incantata","Sen to Chihiro no kamikakushi",2001,"Hayao Miyazaki",125,"SE",1,2,"N","Chihiro resta intrappolata in un mondo di spiriti e deve salvare i genitori."],
+["Il mio vicino Totoro","Tonari no Totoro",1988,"Hayao Miyazaki",86,"SER",1,1,"N","Due sorelline in campagna scoprono le creature gentili della foresta."],
+["Mad Max: Fury Road","",2015,"George Miller",120,"A",0,2,"","Due ore di inseguimento furioso nel deserto, quasi senza pause."],
+["Inception","",2010,"Christopher Nolan",148,"APS",0,2,"","Una squadra di ladri entra nei sogni per piantare un'idea nella mente di un uomo."],
+["Interstellar","",2014,"Christopher Nolan",169,"EPS",0,2,"","Un padre parte nello spazio per salvare l'umanità, mentre il tempo scorre diverso."],
+["Il cavaliere oscuro","The Dark Knight",2008,"Christopher Nolan",152,"AB",0,2,"","Batman contro il Joker, in una Gotham sull'orlo del caos."],
+["Pulp Fiction","",1994,"Quentin Tarantino",154,"AR",0,2,"","Gangster, pugili e una valigetta misteriosa in storie che si incastrano."],
+["Il buono, il brutto, il cattivo","",1966,"Sergio Leone",175,"A",0,2,"","Tre pistoleri a caccia di un tesoro sepolto durante la guerra civile americana."],
+["La vita è bella","",1997,"Roberto Benigni",116,"ER",0,2,"","Un padre trasforma il campo di concentramento in un gioco per proteggere il figlio."],
+["Nuovo Cinema Paradiso","",1988,"Giuseppe Tornatore",155,"EL",0,2,"","Un regista torna in Sicilia e ricorda il proiezionista che gli fece amare il cinema."],
+["Amici miei","",1975,"Mario Monicelli",140,"R",0,1,"","Quattro amici fiorentini di mezza età vivono di scherzi e zingarate."],
+["Perfetti sconosciuti","",2016,"Paolo Genovese",97,"RP",0,2,"","A cena, sette amici mettono i telefoni sul tavolo e leggono tutto ad alta voce."],
+["Quo vado?","",2016,"Gennaro Nunziante",86,"R",1,2,"","Checco farebbe di tutto pur di non perdere il posto fisso, anche finire al Polo Nord."],
+["La grande bellezza","",2013,"Paolo Sorrentino",141,"PE",0,1,"","Jep Gambardella attraversa le notti di Roma cercando qualcosa che valga la pena."],
+["È stata la mano di Dio","",2021,"Paolo Sorrentino",130,"E",0,1,"N","Napoli, anni Ottanta: l'arrivo di Maradona e una tragedia che cambia un ragazzo."],
+["Chiamami col tuo nome","Call Me by Your Name",2017,"Luca Guadagnino",132,"LE",0,1,"","Un'estate del 1983 in Lombardia e un primo amore che non si dimentica."],
+["Il sesto senso","The Sixth Sense",1999,"M. Night Shyamalan",107,"BE",0,2,"","Un bambino vede i morti e uno psicologo prova ad aiutarlo."],
+["Shining","The Shining",1980,"Stanley Kubrick",146,"B",0,2,"","Un inverno da custode in un hotel isolato porta uno scrittore alla follia."],
+["Scappa - Get Out","Get Out",2017,"Jordan Peele",104,"BP",0,2,"","Il weekend dai genitori della fidanzata nasconde qualcosa di molto inquietante."],
+["Hereditary","",2018,"Ari Aster",127,"B",0,1,"","Dopo la morte della nonna, una famiglia scopre un'eredità terribile."],
+["A Quiet Place","",2018,"John Krasinski",90,"BA",0,2,"","Una famiglia sopravvive in silenzio assoluto: chi fa rumore viene trovato."],
+["Il silenzio degli innocenti","The Silence of the Lambs",1991,"Jonathan Demme",118,"B",0,2,"","Una giovane agente FBI chiede aiuto a Hannibal Lecter per catturare un killer."],
+["Seven","Se7en",1995,"David Fincher",127,"BP",0,2,"","Due detective inseguono un assassino che uccide seguendo i sette peccati capitali."],
+["Fight Club","",1999,"David Fincher",139,"PA",0,2,"","Un impiegato insonne fonda con un venditore di sapone un club di lotta clandestino."],
+["Matrix","The Matrix",1999,"Lana e Lilly Wachowski",136,"AP",0,2,"","Un hacker scopre che il mondo in cui vive è una simulazione."],
+["Blade Runner 2049","",2017,"Denis Villeneuve",164,"PS",0,1,"","Un replicante poliziotto scopre un segreto che può cambiare tutto."],
+["Dune","Dune: Part One",2021,"Denis Villeneuve",155,"AS",0,2,"","Paul Atreides arriva sul pianeta deserto più conteso dell'universo."],
+["Arrival","",2016,"Denis Villeneuve",116,"PE",0,1,"","Una linguista deve capire cosa vogliono gli alieni appena atterrati."],
+["Her","",2013,"Spike Jonze",126,"LPE",0,1,"","Un uomo solo si innamora del suo sistema operativo."],
+["Se mi lasci ti cancello","Eternal Sunshine of the Spotless Mind",2004,"Michel Gondry",108,"LPE",0,1,"","Dopo una rottura, due ex si fanno cancellare i ricordi a vicenda."],
+["La La Land","",2016,"Damien Chazelle",128,"LE",0,2,"","Un pianista jazz e un'aspirante attrice si innamorano a Los Angeles."],
+["Whiplash","",2014,"Damien Chazelle",106,"EA",0,1,"","Un giovane batterista e un insegnante disposto a tutto pur di renderlo grande."],
+["Prima dell'alba","Before Sunrise",1995,"Richard Linklater",101,"L",0,1,"","Due sconosciuti scendono dal treno a Vienna e passano insieme una sola notte."],
+["Questione di tempo","About Time",2013,"Richard Curtis",123,"LER",0,1,"","Un ragazzo scopre di poter tornare indietro nel tempo e lo usa per amore."],
+["Notting Hill","",1999,"Roger Michell",124,"LR",0,2,"","Un libraio di Londra e la star di Hollywood più famosa del mondo."],
+["Harry, ti presento Sally...","When Harry Met Sally...",1989,"Rob Reiner",96,"LR",0,1,"","Uomini e donne possono essere solo amici? Dodici anni per scoprirlo."],
+["Orgoglio e pregiudizio","Pride & Prejudice",2005,"Joe Wright",129,"L",1,1,"","Elizabeth Bennet e il signor Darcy, tra antipatia e attrazione."],
+["Grand Budapest Hotel","The Grand Budapest Hotel",2014,"Wes Anderson",99,"RS",0,1,"","Un concierge e il suo garzone coinvolti nel furto di un quadro prezioso."],
+["Il grande Lebowski","The Big Lebowski",1998,"Joel ed Ethan Coen",117,"R",0,1,"","Il Drugo vuole solo il suo tappeto, e finisce in un rapimento."],
+["Fargo","",1996,"Joel ed Ethan Coen",98,"RB",0,1,"","Un rapimento organizzato male e una poliziotta incinta molto tenace."],
+["Non è un paese per vecchi","No Country for Old Men",2007,"Joel ed Ethan Coen",122,"BP",0,1,"","Un cacciatore trova una valigia di soldi e un killer implacabile si mette sulle sue tracce."],
+["Una notte da leoni","The Hangover",2009,"Todd Phillips",100,"R",0,2,"","Addio al celibato a Las Vegas: al risveglio manca lo sposo."],
+["Lo chiamavano Trinità...","",1970,"E.B. Clucher",117,"RA",1,1,"","Due fratelli pistoleri, molti schiaffi e fagioli in un western comico."],
+["Frankenstein Junior","Young Frankenstein",1974,"Mel Brooks",106,"R",0,1,"","Il nipote di Frankenstein eredita il castello e il vizio di famiglia."],
+["Glass Onion - Knives Out","Glass Onion",2022,"Rian Johnson",139,"RB",0,2,"N","Il detective Benoit Blanc su un'isola greca, invitato a un gioco con delitto."],
+["Cena con delitto - Knives Out","Knives Out",2019,"Rian Johnson",130,"RB",0,2,"","Un ricco scrittore muore il giorno del compleanno: tutta la famiglia è sospettata."],
+["Everything Everywhere All at Once","",2022,"Daniel Kwan, Daniel Scheinert",139,"RESA",0,1,"","Una lavandaia alle prese con le tasse scopre di poter saltare tra universi infiniti."],
+["Il Signore degli Anelli - La Compagnia dell'Anello","The Lord of the Rings: The Fellowship of the Ring",2001,"Peter Jackson",178,"SA",1,2,"","Un hobbit parte per distruggere l'anello che può dominare il mondo."],
+["Harry Potter e la pietra filosofale","Harry Potter and the Philosopher's Stone",2001,"Chris Columbus",152,"S",1,2,"","Un ragazzino scopre di essere un mago e arriva a Hogwarts."],
+["Jurassic Park","",1993,"Steven Spielberg",127,"AS",1,2,"","Un parco con dinosauri veri: cosa mai potrebbe andare storto?"],
+["E.T. l'extra-terrestre","E.T. the Extra-Terrestrial",1982,"Steven Spielberg",115,"SE",1,2,"","Un bambino nasconde in casa un alieno che vuole tornare a casa."],
+["I predatori dell'arca perduta","Raiders of the Lost Ark",1981,"Steven Spielberg",115,"ASR",1,2,"","Indiana Jones contro i nazisti per l'Arca dell'Alleanza."],
+["Avengers: Endgame","",2019,"Anthony e Joe Russo",181,"AS",1,2,"D","Gli Avengers rimasti tentano l'ultima mossa per rimediare a Thanos."],
+["Guardiani della Galassia","Guardians of the Galaxy",2014,"James Gunn",121,"ARS",1,2,"D","Cinque disadattati spaziali, una cassetta di canzoni anni '70 e una gemma potentissima."],
+["Spider-Man: Un nuovo universo","Spider-Man: Into the Spider-Verse",2018,"Persichetti, Ramsey, Rothman",117,"ARS",1,2,"","Miles Morales diventa Spider-Man e incontra altri Spider da universi paralleli."],
+["Il re leone","The Lion King",1994,"Roger Allers, Rob Minkoff",88,"ES",1,2,"D","Simba deve affrontare il passato per tornare a essere re."],
+["Ratatouille","",2007,"Brad Bird",111,"RS",1,2,"D","Un topo con un talento da chef nella cucina di un ristorante parigino."],
+["WALL·E","WALL-E",2008,"Andrew Stanton",98,"SEL",1,2,"D","Un piccolo robot spazzino solo sulla Terra si innamora di una sonda."],
+["Gli Incredibili","The Incredibles",2004,"Brad Bird",115,"AR",1,2,"D","Una famiglia di supereroi in pensione forzata torna in azione."],
+["Soul","",2020,"Pete Docter",100,"EPS",1,1,"D","Un insegnante di musica jazz finisce nell'aldilà proprio il giorno della svolta."],
+["Encanto","",2021,"Jared Bush, Byron Howard",102,"SER",1,2,"D","In una famiglia colombiana tutti hanno un dono magico, tranne Mirabel."],
+["Klaus","",2019,"Sergio Pablos",96,"ER",1,1,"N","Un postino viziato e un falegname solitario inventano, quasi per caso, il Natale."],
+["Pinocchio di Guillermo del Toro","Guillermo del Toro's Pinocchio",2022,"Guillermo del Toro",117,"SE",1,1,"N","Il burattino di legno nell'Italia fascista, in animazione stop-motion."],
+["Il ragazzo e l'airone","Kimitachi wa dō ikiru ka",2023,"Hayao Miyazaki",124,"SP",1,1,"","Un ragazzo segue un airone parlante in un mondo dove vivi e morti si incontrano."],
+["Paddington 2","",2017,"Paul King",103,"RE",1,1,"","L'orso più educato di Londra finisce in prigione per un furto che non ha commesso."],
+["Mamma, ho perso l'aereo","Home Alone",1990,"Chris Columbus",103,"R",1,2,"","Dimenticato a casa a Natale, Kevin difende la casa da due ladri."],
+["Il diavolo veste Prada","The Devil Wears Prada",2006,"David Frankel",109,"RL",0,2,"","Una giovane giornalista diventa l'assistente della direttrice di moda più temuta."],
+["Forrest Gump","",1994,"Robert Zemeckis",142,"EL",1,2,"","Un uomo semplice attraversa trent'anni di storia americana senza accorgersene."],
+["Le ali della libertà","The Shawshank Redemption",1994,"Frank Darabont",142,"EP",0,2,"","Un banchiere condannato all'ergastolo non smette di sperare."],
+["Il miglio verde","The Green Mile",1999,"Frank Darabont",189,"E",0,2,"","Nel braccio della morte arriva un gigante gentile con un dono straordinario."],
+["Quasi amici","Intouchables",2011,"Olivier Nakache, Éric Toledano",112,"RE",0,2,"","Un ricco tetraplegico assume come badante un ragazzo di periferia."],
+["L'attimo fuggente","Dead Poets Society",1989,"Peter Weir",128,"EP",0,2,"","Un professore insegna a un gruppo di studenti a pensare con la propria testa."],
+["The Truman Show","",1998,"Peter Weir",103,"PRE",1,2,"","Truman non sa che tutta la sua vita è uno show televisivo."],
+["Il padrino","The Godfather",1972,"Francis Ford Coppola",175,"PA",0,2,"","La famiglia Corleone e il passaggio di potere da padre a figlio."],
+["Quei bravi ragazzi","Goodfellas",1990,"Martin Scorsese",146,"A",0,1,"","Trent'anni di vita nella mafia raccontati da chi c'era dentro."],
+["The Irishman","",2019,"Martin Scorsese",209,"P",0,1,"N","Un sicario ripercorre una vita al servizio della mafia e il caso Hoffa."],
+["Killers of the Flower Moon","",2023,"Martin Scorsese",206,"PB",0,1,"A","Anni Venti: i misteriosi omicidi tra gli Osage, diventati ricchi col petrolio."],
+["CODA - I segni del cuore","CODA",2021,"Sian Heder",111,"ER",1,1,"A","L'unica udente in una famiglia di sordi sogna di cantare."],
+["Oppenheimer","",2023,"Christopher Nolan",180,"P",0,2,"","Lo scienziato che costruì la bomba atomica e il prezzo della sua scoperta."],
+["Barbie","",2023,"Greta Gerwig",114,"RP",1,2,"","Barbie lascia Barbieland e scopre il mondo reale, con Ken al seguito."],
+["Past Lives","",2023,"Celine Song",106,"LE",0,0,"","Due amici d'infanzia coreani si ritrovano dopo vent'anni a New York."],
+["Aftersun","",2022,"Charlotte Wells",102,"E",0,0,"","Una vacanza in Turchia tra un padre giovane e la figlia, ricordata da adulta."],
+["Drive","",2011,"Nicolas Winding Refn",100,"AL",0,1,"","Uno stuntman di giorno, autista per rapine di notte, si innamora della vicina."],
+["Top Gun: Maverick","",2022,"Joseph Kosinski",131,"AE",1,2,"","Maverick torna ad addestrare i migliori piloti per una missione impossibile."],
+["John Wick","",2014,"Chad Stahelski",101,"A",0,2,"","Un ex killer torna in azione dopo che gli hanno toccato il cane."],
+["Old Boy","Oldeuboi",2003,"Park Chan-wook",120,"BA",0,1,"","Rinchiuso per quindici anni senza sapere perché, un uomo esce e cerca vendetta."],
+["Train to Busan","Busanhaeng",2016,"Yeon Sang-ho",118,"BAE",0,1,"","Un'epidemia di zombie esplode a bordo di un treno ad alta velocità."],
+["Midsommar","",2019,"Ari Aster",148,"B",0,1,"","Una festa di mezza estate in Svezia, alla luce del sole, sempre più inquietante."],
+["Alien","",1979,"Ridley Scott",117,"BA",0,2,"","A bordo della Nostromo c'è un ospite che nessuno ha invitato."],
+["Lo squalo","Jaws",1975,"Steven Spielberg",124,"BA",0,2,"","Un'isola turistica, l'estate e uno squalo bianco al largo."],
+["Il pranzo di Babette","Babettes gæstebud",1987,"Gabriel Axel",103,"EP",0,0,"","Una cuoca francese prepara una cena indimenticabile per un villaggio austero."],
+["Marcel the Shell","Marcel the Shell with Shoes On",2021,"Dean Fleischer Camp",90,"ER",1,0,"","Una conchiglia di due centimetri cerca la sua famiglia perduta."],
+["Gli spiriti dell'isola","The Banshees of Inisherin",2022,"Martin McDonagh",114,"RP",0,0,"","Su un'isola irlandese, un uomo decide all'improvviso di non parlare più col suo migliore amico."],
+["Tre manifesti a Ebbing, Missouri","Three Billboards Outside Ebbing, Missouri",2017,"Martin McDonagh",115,"PER",0,1,"","Una madre affitta tre cartelloni per accusare la polizia di non trovare l'assassino della figlia."],
+["Perfect Days","",2023,"Wim Wenders",124,"EP",0,0,"","Le giornate di un addetto alle pulizie dei bagni pubblici di Tokyo."],
+["C'è ancora domani","",2023,"Paola Cortellesi",118,"ER",0,1,"","Roma, 1946: una moglie e madre ha in mente qualcosa di importante."],
+["Il sorpasso","",1962,"Dino Risi",105,"RE",0,1,"","Un Ferragosto in auto sull'Aurelia tra un fanfarone e uno studente timido."],
+["Mediterraneo","",1991,"Gabriele Salvatores",96,"RL",0,1,"","Un drappello di soldati italiani dimenticato su un'isola greca."],
+["Lo chiamavano Jeeg Robot","",2015,"Gabriele Mainetti",112,"AS",0,1,"","Un ladruncolo di Tor Bella Monaca ottiene una forza sovrumana."],
+["Smetto quando voglio","",2014,"Sydney Sibilia",100,"R",0,1,"","Ricercatori precari mettono su una banda per produrre una droga legale."],
+["Ghostbusters","",1984,"Ivan Reitman",105,"RS",1,2,"","Tre scienziati licenziati aprono un'agenzia per catturare fantasmi a New York."],
+["Shrek","",2001,"Andrew Adamson, Vicky Jenson",90,"RS",1,2,"","Un orco brontolone deve salvare una principessa per riavere la sua palude."],
+["Il gladiatore","Gladiator",2000,"Ridley Scott",155,"AE",0,2,"","Un generale tradito diventa schiavo, poi gladiatore, e cerca vendetta a Roma."],
+["Titanic","",1997,"James Cameron",194,"LE",0,2,"","Un amore tra classi diverse a bordo della nave che non poteva affondare."],
+["Little Miss Sunshine","",2006,"Jonathan Dayton, Valerie Faris",101,"RE",0,1,"","Una famiglia disfunzionale in pulmino verso un concorso di bellezza per bambine."],
+["Prisoners","",2013,"Denis Villeneuve",153,"BP",0,1,"","Due bambine scompaiono e un padre decide di farsi giustizia da solo."],
+["The Social Network","",2010,"David Fincher",120,"P",0,1,"","Come è nato Facebook, e quante amicizie è costato."],
+["L'amore bugiardo - Gone Girl","Gone Girl",2014,"David Fincher",149,"BP",0,2,"","Il giorno dell'anniversario la moglie sparisce, e tutti sospettano del marito."],
+["Lady Bird","",2017,"Greta Gerwig",94,"ER",0,1,"","L'ultimo anno di liceo di una ragazza di Sacramento in guerra con la madre."],
+["Piccole donne","Little Women",2019,"Greta Gerwig",135,"EL",1,1,"","Le quattro sorelle March crescono, tra sogni, amori e scelte difficili."],
+["Nomadland","",2020,"Chloé Zhao",108,"EP",0,0,"","Una donna perde tutto e attraversa l'America vivendo nel suo furgone."],
+["Storia di un matrimonio","Marriage Story",2019,"Noah Baumbach",137,"EL",0,1,"N","Un regista e un'attrice affrontano il divorzio cercando di proteggere il figlio."],
+["Don't Look Up","",2021,"Adam McKay",138,"RP",0,2,"N","Due astronomi scoprono una cometa diretta sulla Terra e nessuno li ascolta."],
+["Niente di nuovo sul fronte occidentale","Im Westen nichts Neues",2022,"Edward Berger",148,"EAP",0,1,"N","Un giovane soldato tedesco nelle trincee della Prima guerra mondiale."],
+["Mamma mia!","",2008,"Phyllida Lloyd",108,"RL",1,2,"","Su un'isola greca, una sposa invita tre uomini: uno di loro è suo padre."],
+["Edward mani di forbice","Edward Scissorhands",1990,"Tim Burton",105,"SLE",1,1,"","Un ragazzo con le forbici al posto delle mani scende in un quartiere di periferia."],
+["La storia infinita","Die unendliche Geschichte",1984,"Wolfgang Petersen",102,"S",1,1,"","Un ragazzino legge un libro magico e si accorge che il libro lo sta chiamando."]
+];
+/* Aggiunti da ricerca web (ottobre 2026). Ultimo campo 1 = presenza sulla piattaforma verificata a ottobre 2026.
+   Piattaforme: N Netflix, P Prime Video, D Disney+, H HBO Max, A Apple TV+. Durata 0 = non nota. */
+const WEB = [
+["Frankenstein","",2025,"Guillermo del Toro",150,"BES",0,2,"N","Uno scienziato ossessionato dà vita a una creatura e poi la abbandona al suo destino.",1],
+["Wake Up Dead Man - Knives Out","Wake Up Dead Man: A Knives Out Mystery",2025,"Rian Johnson",144,"RB",0,2,"N","Benoit Blanc indaga su un omicidio impossibile in una piccola parrocchia.",1],
+["KPop Demon Hunters","",2025,"Maggie Kang, Chris Appelhans",100,"ARS",1,2,"N","Tre popstar coreane cacciano demoni di nascosto, mentre una boy band rivale nasconde un segreto.",1],
+["Jay Kelly","",2025,"Noah Baumbach",132,"ER",0,1,"N","Un attore famoso fa i conti con la propria carriera insieme al suo storico manager.",1],
+["La grazia","",2025,"Paolo Sorrentino",131,"PE",0,1,"N","Un presidente della Repubblica a fine mandato davanti a scelte morali difficili.",1],
+["Il club dei delitti del giovedì","The Thursday Murder Club",2025,"Chris Columbus",118,"RB",0,1,"N","Quattro amici settantenni che risolvono vecchi casi si ritrovano davanti a un omicidio vero.",1],
+["The Rip - Soldi sporchi","The Rip",2026,"Joe Carnahan",0,"AB",0,1,"N","Poliziotti di Miami trovano un carico di contanti e la fiducia tra colleghi si sgretola.",1],
+["Animals","",2026,"",0,"AB",0,1,"N","Un candidato sindaco di Los Angeles e la moglie devono pagare il riscatto per il figlio rapito.",1],
+["Peaky Blinders: The Immortal Man","",2026,"Tom Harper",0,"AE",0,2,"N","Birmingham, 1940: Tommy Shelby lascia l'esilio per un'ultima resa dei conti.",1],
+["People We Meet on Vacation","",2026,"Brett Haley",0,"LR",0,1,"N","Due migliori amici opposti, in vacanza insieme ogni estate, si chiedono se siano qualcosa di più.",1],
+["Enola Holmes 3","",2026,"",0,"RS",1,1,"N","La sorella minore di Sherlock affronta un caso intricato a Malta.",1],
+["Apex","",2026,"Baltasar Kormákur",0,"AB",0,1,"N","Nella natura selvaggia australiana una donna deve sopravvivere a un predatore implacabile.",1],
+["Non abbiam bisogno di parole","",2026,"Luca Ribuoli",0,"ER",1,1,"N","Unica udente in una famiglia sorda, una ragazza scopre di avere talento per il canto.",1],
+["Noi, un po' meglio","",2026,"",0,"E",0,0,"N","Una coppia dalle idee opposte si scontra sulla scelta di adottare un figlio.",1],
+["The Storm","Stormen",2026,"",0,"BE",0,0,"N","Una festa nel nord della Svezia, una tempesta che blocca tutti e vecchi segreti.",1],
+["Messaggi per Isabelle","",2026,"",0,"LR",0,0,"N","I vocali di una donna alla sorella scomparsa finiscono sul telefono di uno sconosciuto.",1],
+["Doing Life","",2026,"",0,"LE",0,0,"N","Un detenuto e una madre single si scrivono e si offrono a vicenda una seconda possibilità.",1],
+["L'uomo dei sussurri","The Whisper Man",2025,"",0,"B",0,1,"N","Uno scrittore vedovo e il padre ex poliziotto cercano il figlio rapito.",1],
+["Scream","",1996,"Wes Craven",111,"BR",0,2,"N","Un killer mascherato che conosce a memoria le regole dei film horror.",1],
+["La notte del giudizio","The Purge",2013,"James DeMonaco",85,"BA",0,1,"N","Una notte all'anno ogni crimine è legale, e una famiglia si barrica in casa.",1],
+["L'ultima missione: Project Hail Mary","Project Hail Mary",2026,"Phil Lord, Christopher Miller",0,"SEP",1,2,"P","Un insegnante si risveglia da solo su un'astronave, senza memoria, e deve salvare la Terra.",1],
+["Saltburn","",2023,"Emerald Fennell",131,"BP",0,1,"P","Uno studente di Oxford passa l'estate nella tenuta di un compagno ricchissimo, dove niente è come sembra.",1],
+["Crime 101 - La strada del crimine","Crime 101",2026,"Bart Layton",0,"AB",0,1,"P","Un ladro esperto prepara l'ultimo colpo, con un detective ostinato alle calcagna.",1],
+["Mercy - Sotto accusa","Mercy",2026,"Timur Bekmambetov",0,"AP",0,1,"P","Un detective accusato di omicidio ha 90 minuti per convincere un giudice artificiale.",1],
+["Good Boy","",2025,"Jan Komasa",0,"BP",0,0,"P","Un ragazzo ribelle viene rapito da una famiglia ricca decisa a rieducarlo con metodi brutali.",1],
+["Pecore sotto copertura","The Sheep Detectives",2026,"Kyle Balda",0,"RS",1,1,"P","Un gregge appassionato di gialli indaga su un mistero nella fattoria.",1],
+["Material Love","Materialists",2025,"Celine Song",116,"LR",0,1,"P","Una matchmaker di New York divisa tra l'uomo perfetto sulla carta e il suo ex.",1],
+["Masters of the Universe","",2026,"Travis Knight",134,"AS",1,1,"P","Il principe Adam, cresciuto sulla Terra, deve ritrovare la spada di Grayskull.",1],
+["Masterplan","",2026,"",0,"RA",0,0,"P","Una ladra e un esperto di esplosivi scoprono di essere fratelli e puntano alla Gioconda.",1],
+["A Real Pain","",2024,"Jesse Eisenberg",90,"RE",0,1,"D","Due cugini molto diversi viaggiano in Polonia sulle tracce della nonna scomparsa.",1],
+["Thunderbolts*","",2025,"Jake Schreier",127,"AR",1,2,"D","Una squadra di antieroi Marvel, messa insieme per una missione che nessuno voleva.",1],
+["Elio","",2025,"Madeline Sharafian, Domee Shi, Adrian Molina",99,"SER",1,1,"D","Un bambino di undici anni viene scambiato per l'ambasciatore della Terra presso gli alieni.",1],
+["Zootropolis 2","Zootopia 2",2025,"Jared Bush, Byron Howard",108,"RS",1,2,"D","Judy Hopps e Nick Wilde di nuovo insieme, sotto copertura nella città degli animali.",1],
+["I Fantastici 4: Gli inizi","The Fantastic Four: First Steps",2025,"Matt Shakman",115,"AS",1,2,"D","La prima famiglia Marvel in un'avventura spaziale in stile anni Sessanta.",1],
+["Lilo & Stitch","",2025,"Dean Fleischer Camp",108,"RE",1,2,"D","Una bambina hawaiana adotta un alieno blu scappato da una prigione spaziale.",1],
+["Il diavolo veste Prada 2","The Devil Wears Prada 2",2026,"David Frankel",0,"RL",0,2,"D","Miranda, Andy ed Emily tornano a Runway, vent'anni dopo.",1],
+["Send Help","",2026,"Sam Raimi",0,"BR",0,1,"D","Una dipendente e il suo capo, naufraghi su un'isola deserta: i ruoli si ribaltano.",1],
+["Rental Family","",2025,"Hikari",110,"ER",0,1,"D","A Tokyo un attore americano lavora per un'agenzia che affitta finti parenti.",1],
+["Il testamento di Ann Lee","The Testament of Ann Lee",2025,"Mona Fastvold",0,"EP",0,0,"D","La storia della fondatrice degli Shakers, tra fede, canto e uguaglianza.",1],
+["Predator: Badlands","",2025,"Dan Trachtenberg",107,"AS",0,1,"D","Un giovane Predator emarginato e un'androide si alleano per sopravvivere.",1],
+["Jumpers - Un salto tra gli animali","Hoppers",2026,"Daniel Chong",0,"RS",1,1,"D","Una ragazza trasferisce la sua mente in un castoro robot per vivere tra gli animali.",1],
+["The Mandalorian and Grogu","",2026,"Jon Favreau",132,"AS",1,2,"D","Din Djarin e Grogu in missione contro i signori della guerra imperiali.",1],
+["Finché morte non ci separi 2","Ready or Not 2: Here I Come",2026,"Matt Bettinelli-Olpin, Tyler Gillett",0,"BR",0,1,"D","Grace finisce in un nuovo gioco mortale, questa volta insieme alla sorella.",1],
+["Avatar: La via dell'acqua","Avatar: The Way of Water",2022,"James Cameron",192,"AS",1,2,"D","La famiglia Sully si rifugia presso il popolo del mare di Pandora.",1],
+["Elemental","",2023,"Peter Sohn",101,"LS",1,1,"D","Una ragazza di fuoco e un ragazzo d'acqua in una città dove gli elementi non si mescolano.",1],
+["Red","Turning Red",2022,"Domee Shi",100,"RE",1,1,"D","Una tredicenne di Toronto si trasforma in un panda rosso gigante quando si emoziona.",1],
+["Luca","",2021,"Enrico Casarosa",95,"RS",1,1,"D","Un giovane mostro marino passa l'estate sulla Riviera ligure fingendosi umano.",1],
+["Nightmare Before Christmas","The Nightmare Before Christmas",1993,"Henry Selick",76,"SR",1,2,"D","Il re di Halloween scopre il Natale e decide di organizzarlo lui.",1],
+["Inside Out 2","",2024,"Kelsey Mann",96,"ER",1,2,"D","Riley diventa adolescente e nella sua testa arrivano Ansia e le nuove emozioni.",0],
+["Una battaglia dopo l'altra","One Battle After Another",2025,"Paul Thomas Anderson",162,"ARP",0,2,"H","Un ex rivoluzionario che vive nascosto viene trascinato di nuovo nella lotta per salvare la figlia.",1],
+["I peccatori","Sinners",2025,"Ryan Coogler",137,"BA",0,2,"H","Mississippi, 1932: due gemelli aprono un locale blues e la notte arrivano i vampiri.",1],
+["Anora","",2024,"Sean Baker",139,"RLE",0,1,"","Una giovane di Brooklyn sposa d'impulso il figlio di un oligarca russo.",0],
+["Conclave","",2024,"Edward Berger",120,"PB",0,2,"","Alla morte del Papa, un cardinale guida un conclave pieno di segreti.",0],
+["The Substance","",2024,"Coralie Fargeat",141,"BP",0,1,"","Una star in declino prova un siero che crea una versione più giovane di sé.",0],
+["Dune - Parte due","Dune: Part Two",2024,"Denis Villeneuve",166,"AS",0,2,"","Paul Atreides si unisce ai Fremen e prepara la guerra contro gli Harkonnen.",0],
+["Il robot selvaggio","The Wild Robot",2024,"Chris Sanders",102,"ES",1,2,"","Un robot naufragato su un'isola selvaggia si ritrova a crescere un'ochetta.",0],
+["Flow - Un mondo da salvare","Flow",2024,"Gints Zilbalodis",85,"SE",1,0,"","Un gatto sopravvive a un diluvio su una barca insieme ad altri animali, senza una parola.",0],
+["Vermiglio","",2024,"Maura Delpero",119,"E",0,0,"","Un villaggio di montagna trentino nell'ultimo inverno della Seconda guerra mondiale.",0],
+["Parthenope","",2024,"Paolo Sorrentino",136,"EL",0,1,"","La vita di una donna napoletana dall'estate del 1968 a oggi.",0],
+["The Brutalist","",2024,"Brady Corbet",215,"P",0,1,"","Un architetto ungherese sopravvissuto all'Olocausto ricomincia in America.",0],
+["Io sono ancora qui","Ainda Estou Aqui",2024,"Walter Salles",137,"EP",0,0,"","Brasile, anni Settanta: una madre affronta la sparizione del marito sotto la dittatura.",0],
+["Challengers","",2024,"Luca Guadagnino",131,"LA",0,1,"","Un triangolo amoroso lungo tredici anni, giocato su un campo da tennis.",0],
+["Wicked","",2024,"Jon M. Chu",160,"SE",1,2,"","L'amicizia tra Elphaba e Glinda prima che diventassero le streghe di Oz.",0],
+["A Complete Unknown","",2024,"James Mangold",141,"E",0,1,"","Il giovane Bob Dylan arriva a New York e cambia la musica folk.",0],
+["Il seme del fico sacro","The Seed of the Sacred Fig",2024,"Mohammad Rasoulof",168,"PB",0,0,"","In Iran, durante le proteste, la pistola di un giudice sparisce da casa.",0],
+["Un semplice incidente","Yek tasadof-e sadeh",2025,"Jafar Panahi",104,"PB",0,0,"","Un uomo crede di aver riconosciuto il suo vecchio torturatore e lo rapisce.",0],
+["Marty Supreme","",2025,"Josh Safdie",150,"AR",0,1,"","Un giovane ambizioso degli anni Cinquanta vuole diventare campione di ping pong.",0],
+["Sentimental Value","Affeksjonsverdi",2025,"Joachim Trier",133,"EP",0,0,"","Due sorelle e un padre regista che torna dopo anni con un film su di loro.",0],
+["Hamnet","",2025,"Chloé Zhao",125,"E",0,1,"","La moglie di Shakespeare e la perdita del figlio che ispirò Amleto.",0],
+["F1 - Il film","F1",2025,"Joseph Kosinski",155,"AE",1,2,"A","Un pilota veterano torna in Formula 1 per aiutare una scuderia in crisi.",0],
+["Bugonia","",2025,"Yorgos Lanthimos",118,"RBP",0,1,"","Due cospirazionisti rapiscono una manager convinti che sia un'aliena.",0],
+["Weapons","",2025,"Zach Cregger",128,"B",0,1,"","Alle 2:17 di notte, diciassette bambini della stessa classe escono di casa e spariscono.",0],
+["Superman","",2025,"James Gunn",129,"AS",1,2,"","Un Superman giovane e gentile cerca il suo posto nel mondo, con Lex Luthor contro.",0],
+["Fuori","",2025,"Mario Martone",115,"E",0,0,"","La scrittrice Goliarda Sapienza, il carcere di Rebibbia e le amicizie nate lì.",0]
+];
+/* Altri titoli: classici, cinema italiano, animazione e cataloghi delle piattaforme (ricerca web ottobre 2026) */
+const MORE = [
+// Cinema italiano
+["Il postino","",1994,"Michael Radford",108,"EL",0,1,"","Un postino di un'isola diventa amico di Pablo Neruda e scopre la poesia."],
+["Ladri di biciclette","",1948,"Vittorio De Sica",89,"E",1,1,"","Nella Roma del dopoguerra un padre e il figlio cercano la bicicletta rubata."],
+["Roma città aperta","",1945,"Roberto Rossellini",103,"EP",0,1,"","Roma occupata dai nazisti e la resistenza di un prete e di una popolana."],
+["La dolce vita","",1960,"Federico Fellini",174,"PE",0,2,"","Un giornalista mondano attraversa feste e notti di Roma in cerca di senso."],
+["8½","",1963,"Federico Fellini",138,"PS",0,1,"","Un regista in crisi creativa si perde tra ricordi, sogni e donne."],
+["Amarcord","",1973,"Federico Fellini",123,"RE",0,1,"","Un anno di vita in un borgo romagnolo negli anni del fascismo."],
+["La strada","",1954,"Federico Fellini",108,"E",0,1,"","Una ragazza ingenua segue un rude artista di strada per l'Italia."],
+["Il Gattopardo","",1963,"Luchino Visconti",186,"PE",0,1,"","Un principe siciliano assiste al tramonto della sua classe durante l'Unità."],
+["C'era una volta il West","",1968,"Sergio Leone",165,"AE",0,2,"","Una vedova, un pistolero con l'armonica e la ferrovia che avanza."],
+["C'era una volta in America","",1984,"Sergio Leone",229,"PE",0,2,"","Cinquant'anni di amicizia e tradimenti tra gangster ebrei di New York."],
+["Per qualche dollaro in più","",1965,"Sergio Leone",132,"A",0,1,"","Due cacciatori di taglie si alleano contro un bandito spietato."],
+["I soliti ignoti","",1958,"Mario Monicelli",111,"R",0,1,"","Una banda di ladruncoli maldestri prepara il colpo della vita."],
+["L'armata Brancaleone","",1966,"Mario Monicelli",120,"RS",1,1,"","Un cavaliere squattrinato guida un'armata scalcinata nel Medioevo."],
+["Divorzio all'italiana","",1961,"Pietro Germi",105,"R",0,1,"","Un barone siciliano escogita un piano per liberarsi della moglie."],
+["Una giornata particolare","",1977,"Ettore Scola",106,"EL",0,1,"","Il giorno della visita di Hitler a Roma, una casalinga e un vicino si incontrano."],
+["C'eravamo tanto amati","",1974,"Ettore Scola",124,"EL",0,1,"","Tre amici partigiani e trent'anni di Italia, amori e illusioni."],
+["Il marchese del Grillo","",1981,"Mario Monicelli",135,"R",1,2,"","Un nobile romano annoiato inganna tutti con scherzi crudeli."],
+["Fantozzi","",1975,"Luciano Salce",100,"R",1,2,"","Le disgrazie del ragioniere più sfortunato d'Italia."],
+["Non ci resta che piangere","",1984,"Roberto Benigni, Massimo Troisi",113,"R",1,2,"","Un maestro e un bidello si ritrovano nel 1492 e vogliono fermare Colombo."],
+["Ricomincio da tre","",1981,"Massimo Troisi",110,"RL",0,1,"","Un giovane napoletano parte per Firenze per cambiare aria."],
+["Il mostro","",1994,"Roberto Benigni",112,"R",0,1,"","Un uomo innocuo viene scambiato per un maniaco dalla polizia."],
+["Johnny Stecchino","",1991,"Roberto Benigni",102,"R",1,1,"","Un autista ingenuo è il sosia di un boss mafioso."],
+["Tre uomini e una gamba","",1997,"Aldo, Giovanni e Giacomo, Massimo Venier",98,"R",1,2,"","Tre amici in viaggio verso un matrimonio con una scultura a forma di gamba."],
+["Chiedimi se sono felice","",2000,"Aldo, Giovanni e Giacomo, Massimo Venier",102,"RE",1,2,"","Tre amici, un Cyrano a teatro e una lite che rischia di separarli."],
+["Il ciclone","",1996,"Leonardo Pieraccioni",95,"RL",0,1,"","Cinque ballerine spagnole sconvolgono una famiglia toscana."],
+["Notte prima degli esami","",2006,"Fausto Brizzi",100,"RL",1,1,"","Estate 1989: la maturità, un amore e il professore più temuto."],
+["L'ultimo bacio","",2001,"Gabriele Muccino",115,"LE",0,1,"","Un trentenne in crisi davanti a paternità e tentazioni."],
+["La meglio gioventù","",2003,"Marco Tullio Giordana",366,"E",0,1,"","Due fratelli e quarant'anni di storia italiana."],
+["I cento passi","",2000,"Marco Tullio Giordana",114,"EP",0,1,"","Peppino Impastato sfida la mafia del suo paese con una radio."],
+["Gomorra","",2008,"Matteo Garrone",137,"PB",0,1,"","Cinque storie dentro il sistema della camorra."],
+["Dogman","",2018,"Matteo Garrone",103,"B",0,1,"","Un toelettatore di cani subisce le prepotenze di un ex pugile."],
+["Io capitano","",2023,"Matteo Garrone",121,"EA",0,1,"","Due ragazzi senegalesi attraversano deserto e mare verso l'Europa."],
+["Il divo","",2008,"Paolo Sorrentino",110,"P",0,1,"","Giulio Andreotti negli anni dei processi e delle ombre."],
+["Le conseguenze dell'amore","",2004,"Paolo Sorrentino",100,"PB",0,1,"","Un uomo solitario in un hotel svizzero custodisce un segreto."],
+["Youth - La giovinezza","Youth",2015,"Paolo Sorrentino",124,"EP",0,1,"","Due vecchi amici in vacanza in un albergo sulle Alpi."],
+["Il traditore","",2019,"Marco Bellocchio",145,"P",0,1,"","Tommaso Buscetta e la sua collaborazione con Falcone."],
+["La stanza del figlio","",2001,"Nanni Moretti",99,"E",0,1,"","Uno psicanalista e la sua famiglia affrontano un lutto improvviso."],
+["Caro diario","",1993,"Nanni Moretti",100,"RP",0,1,"","In Vespa per Roma, tra le isole Eolie e i medici."],
+["Benvenuti al Sud","",2010,"Luca Miniero",102,"R",1,2,"","Un direttore delle poste lombardo trasferito per punizione in Campania."],
+["Il capitale umano","",2013,"Paolo Virzì",109,"PB",0,1,"","Un incidente notturno lega due famiglie brianzole."],
+["La pazza gioia","",2016,"Paolo Virzì",116,"RE",0,1,"","Due donne fuggono da una comunità terapeutica in Toscana."],
+["Ovosodo","",1997,"Paolo Virzì",100,"RE",0,1,"","Crescere nel quartiere popolare di Livorno."],
+["Il ragazzo invisibile","",2014,"Gabriele Salvatores",100,"S",1,1,"","Un ragazzino di Trieste scopre di poter diventare invisibile."],
+["Io non ho paura","",2003,"Gabriele Salvatores",101,"BE",0,1,"","Un bambino scopre un segreto terribile in un buco nei campi."],
+["Suburra","",2015,"Stefano Sollima",135,"AB",0,1,"","Politica, mafia e Vaticano attorno a un affare a Ostia."],
+["La ragazza del lago","",2007,"Andrea Molaioli",95,"B",0,0,"","Un commissario indaga sulla morte di una ragazza in un paese del Friuli."],
+["Il primo re","",2019,"Matteo Rovere",127,"A",0,0,"","Romolo e Remo, in latino arcaico, prima della fondazione di Roma."],
+["Pane e tulipani","",2000,"Silvio Soldini",114,"RL",0,1,"","Una casalinga dimenticata in autogrill decide di restare a Venezia."],
+["Le fate ignoranti","",2001,"Ferzan Özpetek",106,"EL",0,1,"","Una vedova scopre la doppia vita del marito."],
+["Mine vaganti","",2010,"Ferzan Özpetek",110,"RE",0,1,"","Due fratelli vogliono fare coming out nella famiglia pugliese."],
+["Diamanti","",2024,"Ferzan Özpetek",135,"E",0,1,"","Una sartoria romana negli anni Settanta, tutta al femminile."],
+["Il colibrì","",2022,"Francesca Archibugi",126,"E",0,0,"","La vita di un oculista tra amori, perdite e una famiglia complicata."],
+["Nostalgia","",2022,"Mario Martone",117,"EB",0,0,"","Dopo quarant'anni un uomo torna al rione Sanità di Napoli."],
+["Il sol dell'avvenire","",2023,"Nanni Moretti",95,"RP",0,0,"","Un regista prova a girare un film sul 1956 mentre tutto gli crolla."],
+["Comandante","",2023,"Edoardo De Angelis",120,"EA",0,0,"","Un sommergibile italiano salva i naufraghi della nave nemica."],
+["Le otto montagne","",2022,"Felix van Groeningen, Charlotte Vandermeersch",147,"E",0,1,"","Un'amicizia lunga una vita nata da bambini in Val d'Aosta."],
+["Freaks Out","",2021,"Gabriele Mainetti",141,"AS",0,1,"","Quattro artisti di un circo con poteri speciali nella Roma del 1943."],
+["La mafia uccide solo d'estate","",2013,"Pif",90,"RE",1,1,"","Crescere a Palermo innamorati, mentre la mafia uccide."],
+["L'incredibile storia dell'Isola delle Rose","",2020,"Sydney Sibilia",117,"RE",1,1,"N","Un ingegnere costruisce un'isola in mare e la dichiara nazione indipendente.",1],
+["Sulla stessa onda","",2021,"Massimiliano Camaiti",90,"L",0,0,"N","Un amore estivo in Sicilia messo alla prova dalla malattia.",1],
+["Sotto il sole di Riccione","",2020,"YouNuts!",100,"LR",0,1,"N","Un'estate di amori adolescenti sotto gli ombrelloni.",1],
+["Ultras","",2020,"Francesco Lettieri",108,"A",0,0,"N","Un capo ultrà napoletano davanti alla scelta di lasciare la curva.",1],
+["Romanzo criminale","",2005,"Michele Placido",152,"AB",0,1,"","L'ascesa della banda della Magliana nella Roma degli anni Settanta."],
+["La leggenda del pianista sull'oceano","",1998,"Giuseppe Tornatore",169,"ES",0,1,"","Un pianista nato su un transatlantico non è mai sceso a terra."],
+["Malèna","",2000,"Giuseppe Tornatore",109,"EL",0,1,"","Un ragazzino siciliano osserva la donna più bella del paese."],
+["La migliore offerta","",2013,"Giuseppe Tornatore",131,"LB",0,1,"","Un battitore d'aste solitario e una cliente che non si fa vedere."],
+["Il ragazzo dai pantaloni rosa","",2024,"Margherita Ferri",115,"E",0,1,"","La storia vera di un ragazzo vittima di bullismo."],
+["Berlinguer - La grande ambizione","",2024,"Andrea Segre",122,"P",0,0,"","Enrico Berlinguer e gli anni del compromesso storico."],
+// Classici internazionali
+["Casablanca","",1942,"Michael Curtiz",102,"LE",0,2,"","In Marocco, durante la guerra, un locale e un vecchio amore."],
+["Via col vento","Gone with the Wind",1939,"Victor Fleming",238,"LE",0,2,"","Rossella O'Hara attraversa la guerra di secessione."],
+["Quarto potere","Citizen Kane",1941,"Orson Welles",119,"P",0,1,"","Un giornalista indaga sull'ultima parola di un magnate."],
+["La finestra sul cortile","Rear Window",1954,"Alfred Hitchcock",112,"B",0,2,"","Un fotografo immobilizzato crede di aver visto un omicidio dalla finestra."],
+["La donna che visse due volte","Vertigo",1958,"Alfred Hitchcock",128,"BL",0,1,"","Un ex poliziotto soffre di vertigini e si ossessiona per una donna."],
+["Psyco","Psycho",1960,"Alfred Hitchcock",109,"B",0,2,"","Una donna in fuga si ferma in un motel isolato."],
+["Intrigo internazionale","North by Northwest",1959,"Alfred Hitchcock",136,"AR",0,1,"","Un pubblicitario scambiato per una spia fugge per l'America."],
+["Gli uccelli","The Birds",1963,"Alfred Hitchcock",119,"B",0,1,"","In una cittadina costiera gli uccelli iniziano ad attaccare."],
+["A qualcuno piace caldo","Some Like It Hot",1959,"Billy Wilder",121,"R",0,2,"","Due musicisti si travestono da donne per sfuggire alla mafia."],
+["L'appartamento","The Apartment",1960,"Billy Wilder",125,"RL",0,1,"","Un impiegato presta l'appartamento ai capi per le loro scappatelle."],
+["Viale del tramonto","Sunset Boulevard",1950,"Billy Wilder",110,"PB",0,1,"","Uno sceneggiatore e una diva del muto dimenticata."],
+["Vacanze romane","Roman Holiday",1953,"William Wyler",118,"LR",1,2,"","Una principessa in fuga e un giornalista per un giorno a Roma."],
+["Colazione da Tiffany","Breakfast at Tiffany's",1961,"Blake Edwards",115,"LR",0,2,"","Holly Golightly e il suo vicino scrittore a New York."],
+["Cantando sotto la pioggia","Singin' in the Rain",1952,"Stanley Donen, Gene Kelly",103,"RL",1,1,"","Hollywood passa al sonoro, tra canzoni e balli."],
+["Il mago di Oz","The Wizard of Oz",1939,"Victor Fleming",102,"S",1,2,"","Dorothy, un tornado e la strada di mattoni gialli."],
+["Tutti insieme appassionatamente","The Sound of Music",1965,"Robert Wise",174,"EL",1,2,"","Una novizia diventa istitutrice dei sette figli di un capitano austriaco."],
+["Mary Poppins","",1964,"Robert Stevenson",139,"SR",1,2,"D","Una tata magica arriva a sistemare una famiglia londinese."],
+["Lawrence d'Arabia","Lawrence of Arabia",1962,"David Lean",222,"AE",0,1,"","Un ufficiale inglese guida la rivolta araba nel deserto."],
+["2001: Odissea nello spazio","2001: A Space Odyssey",1968,"Stanley Kubrick",149,"PS",0,2,"","Dall'alba dell'uomo a un viaggio verso Giove con un computer ribelle."],
+["Arancia meccanica","A Clockwork Orange",1971,"Stanley Kubrick",136,"PB",0,2,"","Un giovane violento sottoposto a una terapia di rieducazione."],
+["Il dottor Stranamore","Dr. Strangelove",1964,"Stanley Kubrick",95,"RP",0,1,"","Un generale impazzito avvia un attacco nucleare."],
+["Full Metal Jacket","",1987,"Stanley Kubrick",116,"AP",0,1,"","Dall'addestramento dei marines all'inferno del Vietnam."],
+["Taxi Driver","",1976,"Martin Scorsese",114,"PB",0,2,"","Un tassista insonne di New York sprofonda nella solitudine."],
+["Toro scatenato","Raging Bull",1980,"Martin Scorsese",129,"EP",0,1,"","Ascesa e caduta del pugile Jake LaMotta."],
+["Il padrino - Parte II","The Godfather Part II",1974,"Francis Ford Coppola",202,"P",0,2,"","Michael Corleone al potere e le origini del giovane Vito."],
+["Apocalypse Now","",1979,"Francis Ford Coppola",147,"AP",0,2,"","Un capitano risale un fiume in Cambogia per eliminare un colonnello."],
+["Qualcuno volò sul nido del cuculo","One Flew Over the Cuckoo's Nest",1975,"Miloš Forman",133,"EP",0,2,"","Un ribelle in un ospedale psichiatrico sfida l'infermiera capo."],
+["Rocky","",1976,"John G. Avildsen",120,"EA",1,2,"","Un pugile di Filadelfia ha la chance di affrontare il campione."],
+["Guerre stellari","Star Wars",1977,"George Lucas",121,"AS",1,2,"D","Un ragazzo di un pianeta deserto si unisce alla ribellione."],
+["L'impero colpisce ancora","The Empire Strikes Back",1980,"Irvin Kershner",124,"AS",1,2,"D","I ribelli in fuga, l'addestramento di Luke e una rivelazione."],
+["Il cacciatore","The Deer Hunter",1978,"Michael Cimino",183,"EP",0,1,"","Tre amici della Pennsylvania partono per il Vietnam."],
+["Io e Annie","Annie Hall",1977,"Woody Allen",93,"RL",0,1,"","Un comico nevrotico ripercorre la storia con Annie."],
+["Manhattan","",1979,"Woody Allen",96,"LP",0,1,"","Amori incrociati di uno scrittore nella New York in bianco e nero."],
+["Blade Runner","",1982,"Ridley Scott",117,"PS",0,2,"","Los Angeles 2019: un cacciatore di androidi ribelli."],
+["La cosa","The Thing",1982,"John Carpenter",109,"B",0,1,"","In una base antartica qualcosa può assumere l'aspetto di chiunque."],
+["Halloween - La notte delle streghe","Halloween",1978,"John Carpenter",91,"B",0,1,"","Michael Myers torna a casa la notte di Halloween."],
+["L'esorcista","The Exorcist",1973,"William Friedkin",122,"B",0,2,"","Una madre e due preti contro la possessione di una bambina."],
+["Rosemary's Baby","",1968,"Roman Polanski",137,"B",0,1,"","Una giovane sposa incinta sospetta dei vicini."],
+["Il pianista","The Pianist",2002,"Roman Polanski",150,"E",0,2,"","Un pianista ebreo sopravvive nella Varsavia occupata."],
+["Chinatown","",1974,"Roman Polanski",130,"BP",0,1,"","Un detective di Los Angeles finisce in una storia di acqua e potere."],
+["Terminator 2 - Il giorno del giudizio","Terminator 2: Judgment Day",1991,"James Cameron",137,"AS",0,2,"","Un cyborg protegge il futuro leader dell'umanità."],
+["Aliens - Scontro finale","Aliens",1986,"James Cameron",137,"AB",0,1,"","Ripley torna sul pianeta degli alieni con i marines."],
+["Die Hard - Trappola di cristallo","Die Hard",1988,"John McTiernan",132,"AR",0,2,"","Un poliziotto solo contro terroristi in un grattacielo la vigilia di Natale."],
+["Indiana Jones e l'ultima crociata","Indiana Jones and the Last Crusade",1989,"Steven Spielberg",127,"ASR",1,2,"","Indy e il padre alla ricerca del Santo Graal."],
+["Incontri ravvicinati del terzo tipo","Close Encounters of the Third Kind",1977,"Steven Spielberg",135,"SP",1,1,"","Un elettricista ossessionato da una montagna dopo aver visto un UFO."],
+["I Goonies","The Goonies",1985,"Richard Donner",114,"RS",1,2,"","Un gruppo di ragazzini cerca il tesoro di un pirata."],
+["Breakfast Club","The Breakfast Club",1985,"John Hughes",97,"RE",0,1,"","Cinque studenti diversissimi in punizione di sabato."],
+["Una pazza giornata di vacanza","Ferris Bueller's Day Off",1986,"John Hughes",103,"R",1,1,"","Ferris marina la scuola e si gode Chicago."],
+["Ghost - Fantasma","Ghost",1990,"Jerry Zucker",127,"LS",0,2,"","Un uomo ucciso resta accanto alla donna che ama."],
+["Dirty Dancing - Balli proibiti","Dirty Dancing",1987,"Emile Ardolino",100,"L",0,2,"","Un'estate in un villaggio vacanze e un maestro di ballo."],
+["Pretty Woman","",1990,"Garry Marshall",119,"LR",0,2,"","Un uomo d'affari e una ragazza di strada a Beverly Hills."],
+["La storia fantastica","The Princess Bride",1987,"Rob Reiner",98,"SRL",1,1,"","Un nonno legge al nipote una fiaba di pirati, giganti e vero amore."],
+["Stand by Me - Ricordo di un'estate","Stand by Me",1986,"Rob Reiner",89,"E",0,1,"","Quattro ragazzini partono per vedere un cadavere nel bosco."],
+["Misery non deve morire","Misery",1990,"Rob Reiner",107,"B",0,1,"","Uno scrittore ferito è prigioniero della sua più grande fan."],
+["Balla coi lupi","Dances with Wolves",1990,"Kevin Costner",181,"EA",0,1,"","Un tenente nordista vive tra i Sioux."],
+["Il settimo sigillo","Det sjunde inseglet",1957,"Ingmar Bergman",96,"P",0,0,"","Un cavaliere gioca a scacchi con la Morte."],
+["I sette samurai","Shichinin no samurai",1954,"Akira Kurosawa",207,"A",0,1,"","Contadini assoldano sette samurai contro i banditi."],
+["Rashomon","",1950,"Akira Kurosawa",88,"P",0,0,"","Quattro versioni diverse dello stesso delitto."],
+["Tempi moderni","Modern Times",1936,"Charlie Chaplin",87,"R",1,1,"","Charlot alle prese con la catena di montaggio."],
+["Luci della città","City Lights",1931,"Charlie Chaplin",87,"RL",1,1,"","Il vagabondo si innamora di una fioraia cieca."],
+["Il grande dittatore","The Great Dictator",1940,"Charlie Chaplin",125,"RP",0,1,"","Un barbiere ebreo è il sosia del dittatore."],
+["Le iene","Reservoir Dogs",1992,"Quentin Tarantino",99,"A",0,2,"","Una rapina finita male e un traditore tra i rapinatori."],
+["Il buio oltre la siepe","To Kill a Mockingbird",1962,"Robert Mulligan",129,"EP",1,1,"","Un avvocato del Sud difende un nero accusato ingiustamente."],
+// Anni 90-2000 e oltre
+["Schindler's List","",1993,"Steven Spielberg",195,"EP",0,2,"","Un industriale tedesco salva più di mille ebrei."],
+["Salvate il soldato Ryan","Saving Private Ryan",1998,"Steven Spielberg",169,"AE",0,2,"","Dopo lo sbarco in Normandia, una squadra cerca un soldato."],
+["Prova a prendermi","Catch Me If You Can",2002,"Steven Spielberg",141,"RA",0,2,"","Un giovane truffatore e l'agente FBI che lo insegue."],
+["Minority Report","",2002,"Steven Spielberg",145,"AP",0,1,"","Una polizia che arresta i colpevoli prima del crimine."],
+["Il ponte delle spie","Bridge of Spies",2015,"Steven Spielberg",142,"P",0,1,"","Un avvocato negozia uno scambio di spie a Berlino."],
+["The Fabelmans","",2022,"Steven Spielberg",151,"E",0,1,"","Un ragazzo scopre il cinema mentre la sua famiglia si incrina."],
+["I soliti sospetti","The Usual Suspects",1995,"Bryan Singer",106,"BP",0,2,"","Cinque criminali e il misterioso Keyser Söze."],
+["Heat - La sfida","Heat",1995,"Michael Mann",170,"A",0,1,"","Un rapinatore e un poliziotto ossessionato, uno di fronte all'altro."],
+["Collateral","",2004,"Michael Mann",120,"AB",0,1,"","Un tassista costretto a portare un killer in giro per Los Angeles."],
+["L'ultimo dei Mohicani","The Last of the Mohicans",1992,"Michael Mann",112,"AL",0,1,"","Amore e guerra nelle foreste del Nord America del Settecento."],
+["L.A. Confidential","",1997,"Curtis Hanson",138,"B",0,1,"","Tre poliziotti di Los Angeles e una strage in un bar."],
+["Trainspotting","",1996,"Danny Boyle",94,"RP",0,2,"","Giovani di Edimburgo tra eroina, amicizia e fughe."],
+["The Millionaire","Slumdog Millionaire",2008,"Danny Boyle",120,"EA",0,2,"","Un ragazzo di Mumbai a un passo dalla vittoria al quiz."],
+["28 giorni dopo","28 Days Later",2002,"Danny Boyle",113,"BA",0,1,"","Un uomo si risveglia in una Londra deserta dopo un'epidemia."],
+["Lock & Stock - Pazzi scatenati","Lock, Stock and Two Smoking Barrels",1998,"Guy Ritchie",107,"RA",0,1,"","Quattro amici londinesi con un debito impossibile."],
+["Snatch - Lo strappo","Snatch",2000,"Guy Ritchie",104,"RA",0,1,"","Un diamante rubato e una galleria di criminali pittoreschi."],
+["Sherlock Holmes","",2009,"Guy Ritchie",128,"RA",1,1,"","Holmes e Watson contro un lord che pratica la magia nera."],
+["Il quinto elemento","The Fifth Element",1997,"Luc Besson",126,"AS",1,1,"","Un tassista del futuro deve salvare la Terra."],
+["Léon","",1994,"Luc Besson",110,"AE",0,2,"","Un killer solitario accoglie una ragazzina orfana."],
+["Jackie Brown","",1997,"Quentin Tarantino",154,"A",0,1,"","Una hostess incastrata tra polizia e trafficante d'armi."],
+["Kill Bill: Volume 1","Kill Bill: Vol. 1",2003,"Quentin Tarantino",111,"A",0,2,"","La Sposa si risveglia dal coma e cerca vendetta."],
+["Kill Bill: Volume 2","Kill Bill: Vol. 2",2004,"Quentin Tarantino",136,"AE",0,2,"N","La Sposa completa la vendetta e arriva da Bill.",1],
+["Bastardi senza gloria","Inglourious Basterds",2009,"Quentin Tarantino",153,"AR",0,2,"","Un commando ebreo americano nella Francia occupata."],
+["Django Unchained","",2012,"Quentin Tarantino",165,"AR",0,2,"","Uno schiavo liberato e un cacciatore di taglie nel Sud."],
+["C'era una volta a... Hollywood","Once Upon a Time in Hollywood",2019,"Quentin Tarantino",161,"RP",0,1,"","Un attore in declino e la sua controfigura nella Hollywood del 1969."],
+["Memento","",2000,"Christopher Nolan",113,"PB",0,2,"","Un uomo senza memoria a breve termine cerca l'assassino della moglie."],
+["The Prestige","",2006,"Christopher Nolan",130,"PB",0,2,"","Due illusionisti rivali nella Londra vittoriana."],
+["Batman Begins","",2005,"Christopher Nolan",140,"A",1,2,"","Bruce Wayne diventa Batman."],
+["Il cavaliere oscuro - Il ritorno","The Dark Knight Rises",2012,"Christopher Nolan",164,"A",0,2,"","Batman torna dopo otto anni contro Bane."],
+["Tenet","",2020,"Christopher Nolan",150,"AP",0,1,"","Un agente impara a muoversi in un mondo dove il tempo scorre al contrario."],
+["Dunkirk","",2017,"Christopher Nolan",106,"AE",0,1,"","L'evacuazione di Dunkerque da terra, mare e cielo."],
+["American Beauty","",1999,"Sam Mendes",122,"PR",0,2,"","Un uomo di mezza età rimette in discussione la sua vita."],
+["1917","",2019,"Sam Mendes",119,"AE",0,2,"","Due soldati devono attraversare le linee nemiche con un messaggio."],
+["Skyfall","",2012,"Sam Mendes",143,"A",0,2,"","James Bond protegge M da un ex agente in cerca di vendetta."],
+["Casino Royale","",2006,"Martin Campbell",144,"A",0,2,"","La prima missione di Bond con licenza di uccidere."],
+["A Beautiful Mind","",2001,"Ron Howard",135,"EP",0,2,"","Un genio della matematica lotta con la schizofrenia."],
+["Rush","",2013,"Ron Howard",123,"AE",0,1,"","La rivalità tra Niki Lauda e James Hunt in Formula 1."],
+["Apollo 13","",1995,"Ron Howard",140,"AE",1,1,"","Una missione lunare va storta e bisogna tornare a casa."],
+["Cast Away","",2000,"Robert Zemeckis",143,"E",0,2,"","Un naufrago solo su un'isola deserta per quattro anni."],
+["Contact","",1997,"Robert Zemeckis",150,"PS",1,1,"","Una scienziata riceve un segnale dallo spazio."],
+["The Departed - Il bene e il male","The Departed",2006,"Martin Scorsese",151,"AB",0,2,"","Un poliziotto infiltrato nella mafia e un mafioso infiltrato nella polizia."],
+["Shutter Island","",2010,"Martin Scorsese",138,"BP",0,2,"","Un agente indaga su una fuga da un manicomio su un'isola."],
+["The Wolf of Wall Street","",2013,"Martin Scorsese",180,"RA",0,2,"","Ascesa e caduta di un broker senza scrupoli."],
+["Zodiac","",2007,"David Fincher",157,"BP",0,1,"","Un vignettista ossessionato dal killer dello Zodiaco."],
+["Il curioso caso di Benjamin Button","The Curious Case of Benjamin Button",2008,"David Fincher",166,"EL",0,1,"","Un uomo nasce vecchio e ringiovanisce col tempo."],
+["Million Dollar Baby","",2004,"Clint Eastwood",132,"E",0,2,"","Un vecchio allenatore accetta di allenare una giovane pugile."],
+["Gran Torino","",2008,"Clint Eastwood",116,"E",0,2,"","Un veterano scorbutico si lega ai vicini asiatici."],
+["Mystic River","",2003,"Clint Eastwood",138,"BP",0,1,"","Tre amici d'infanzia di nuovo uniti da un omicidio."],
+["Gli spietati","Unforgiven",1992,"Clint Eastwood",131,"A",0,1,"","Un vecchio pistolero accetta un'ultima taglia."],
+["American Sniper","",2014,"Clint Eastwood",133,"A",0,1,"","Il cecchino più letale della storia militare americana."],
+["Braveheart - Cuore impavido","Braveheart",1995,"Mel Gibson",178,"AE",0,2,"","William Wallace guida gli scozzesi contro gli inglesi."],
+["La battaglia di Hacksaw Ridge","Hacksaw Ridge",2016,"Mel Gibson",139,"AE",0,1,"","Un medico militare che rifiuta le armi salva decine di soldati."],
+["Pirati dei Caraibi - La maledizione della prima luna","Pirates of the Caribbean: The Curse of the Black Pearl",2003,"Gore Verbinski",143,"ARS",1,2,"D","Jack Sparrow e un fabbro contro una ciurma maledetta."],
+["The Ring","",2002,"Gore Verbinski",115,"B",0,1,"","Chi guarda una videocassetta muore dopo sette giorni."],
+["Il Signore degli Anelli - Le due torri","The Lord of the Rings: The Two Towers",2002,"Peter Jackson",179,"SA",1,2,"N","La Compagnia divisa e la battaglia del Fosso di Helm.",1],
+["Il Signore degli Anelli - Il ritorno del re","The Lord of the Rings: The Return of the King",2003,"Peter Jackson",201,"SAE",1,2,"N","La battaglia finale per la Terra di Mezzo.",1],
+["Lo Hobbit - Un viaggio inaspettato","The Hobbit: An Unexpected Journey",2012,"Peter Jackson",169,"SA",1,1,"","Bilbo parte con tredici nani per riconquistare la Montagna."],
+["Harry Potter e il prigioniero di Azkaban","Harry Potter and the Prisoner of Azkaban",2004,"Alfonso Cuarón",142,"S",1,2,"H","Un pericoloso evaso da Azkaban sembra cercare Harry."],
+["Harry Potter e i doni della morte - Parte 2","Harry Potter and the Deathly Hallows: Part 2",2011,"David Yates",130,"SAE",1,2,"H","La battaglia finale di Hogwarts contro Voldemort."],
+["Avatar","",2009,"James Cameron",162,"AS",1,2,"D","Un marine paraplegico scopre il mondo dei Na'vi su Pandora."],
+["Iron Man","",2008,"Jon Favreau",126,"AR",1,2,"D","Tony Stark costruisce un'armatura e diventa un eroe."],
+["The Avengers","",2012,"Joss Whedon",143,"A",1,2,"D","Gli eroi Marvel si uniscono contro Loki."],
+["Avengers: Infinity War","",2018,"Anthony e Joe Russo",149,"A",1,2,"D","Thanos dà la caccia alle Gemme dell'Infinito."],
+["Black Panther","",2018,"Ryan Coogler",134,"A",1,2,"D","Il nuovo re del Wakanda deve difendere il trono."],
+["Spider-Man: No Way Home","",2021,"Jon Watts",148,"AE",1,2,"D","Peter Parker chiede un incantesimo e apre il multiverso.",1],
+["Thor: Ragnarok","",2017,"Taika Waititi",130,"RA",1,2,"D","Thor prigioniero su un pianeta di gladiatori."],
+["Jojo Rabbit","",2019,"Taika Waititi",108,"RE",0,1,"D","Un bambino tedesco con Hitler come amico immaginario."],
+["Deadpool & Wolverine","",2024,"Shawn Levy",128,"RA",0,2,"D","Deadpool recluta un Wolverine riluttante per salvare il suo universo."],
+["Logan - The Wolverine","Logan",2017,"James Mangold",137,"AE",0,2,"","Un Wolverine stanco protegge una bambina mutante."],
+["Le Mans '66 - La grande sfida","Ford v Ferrari",2019,"James Mangold",152,"AE",1,1,"D","Ford sfida la Ferrari alla 24 Ore di Le Mans."],
+["Deadpool","",2016,"Tim Miller",108,"RA",0,2,"","Un mercenario sboccato e immortale cerca vendetta."],
+["Joker","",2019,"Todd Phillips",122,"PB",0,2,"N","Un comico fallito di Gotham sprofonda nella follia.",1],
+["The Batman","",2022,"Matt Reeves",176,"AB",0,2,"H","Batman insegue l'Enigmista in una Gotham corrotta.",1],
+["Norimberga","Nuremberg",2025,"James Vanderbilt",148,"P",0,1,"H","Uno psichiatra americano esamina Göring prima del processo.",1],
+["Warfare - Tempo di guerra","Warfare",2025,"Alex Garland, Ray Mendoza",95,"A",0,1,"H","Un'unità di Navy SEAL sotto assedio in Iraq, in tempo reale.",1],
+["Love Actually - L'amore davvero","Love Actually",2003,"Richard Curtis",135,"LR",0,2,"","Dieci storie d'amore intrecciate a Londra prima di Natale."],
+["Il diario di Bridget Jones","Bridget Jones's Diary",2001,"Sharon Maguire",97,"LR",0,2,"","Una trentenne londinese tra due uomini e tanti propositi."],
+["Le pagine della nostra vita","The Notebook",2004,"Nick Cassavetes",123,"LE",0,2,"","Un anziano legge a una donna la storia di un grande amore."],
+["Crazy, Stupid, Love","",2011,"Glenn Ficarra, John Requa",118,"LR",0,1,"","Un uomo appena lasciato prende lezioni da un seduttore."],
+["(500) giorni insieme","(500) Days of Summer",2009,"Marc Webb",95,"LR",0,1,"","Tom ripercorre in disordine i giorni con Summer."],
+["Il lato positivo","Silver Linings Playbook",2012,"David O. Russell",122,"LRE",0,1,"","Due persone fragili si allenano per una gara di ballo."],
+["Midnight in Paris","",2011,"Woody Allen",94,"LSR",0,1,"","Uno scrittore a mezzanotte si ritrova nella Parigi degli anni Venti."],
+["La forma dell'acqua","The Shape of Water",2017,"Guillermo del Toro",123,"LS",0,1,"","Una donna muta si innamora di una creatura acquatica."],
+["Il labirinto del fauno","El laberinto del fauno",2006,"Guillermo del Toro",118,"SB",0,1,"","Una bambina nella Spagna franchista trova un regno sotterraneo."],
+["Pacific Rim","",2013,"Guillermo del Toro",131,"A",1,1,"","Robot giganti contro mostri emersi dall'oceano."],
+["Big Fish - Le storie di una vita incredibile","Big Fish",2003,"Tim Burton",125,"SE",1,1,"","Un figlio cerca la verità dietro le favole del padre."],
+["La fabbrica di cioccolato","Charlie and the Chocolate Factory",2005,"Tim Burton",115,"SR",1,2,"","Cinque bambini visitano la fabbrica di Willy Wonka."],
+["Beetlejuice - Spiritello porcello","Beetlejuice",1988,"Tim Burton",92,"RS",1,1,"","Due fantasmi chiamano un bio-esorcista per cacciare i nuovi inquilini."],
+["Lost in Translation - L'amore tradotto","Lost in Translation",2003,"Sofia Coppola",102,"LE",0,1,"","Un attore e una giovane donna si incontrano a Tokyo."],
+["Into the Wild - Nelle terre selvagge","Into the Wild",2007,"Sean Penn",148,"EP",0,2,"","Un ragazzo abbandona tutto per vivere in Alaska."],
+["Juno","",2007,"Jason Reitman",96,"RE",0,1,"","Una sedicenne incinta cerca la famiglia giusta per il bambino."],
+["Il discorso del re","The King's Speech",2010,"Tom Hooper",118,"E",0,2,"","Re Giorgio VI e il logopedista che lo aiuta a parlare."],
+["12 anni schiavo","12 Years a Slave",2013,"Steve McQueen",134,"EP",0,1,"","Un uomo libero rapito e venduto come schiavo."],
+["Moonlight","",2016,"Barry Jenkins",111,"E",0,1,"","Tre età di un ragazzo nero di Miami."],
+["Il caso Spotlight","Spotlight",2015,"Tom McCarthy",129,"P",0,1,"","I giornalisti del Boston Globe indagano sugli abusi nella Chiesa."],
+["La teoria del tutto","The Theory of Everything",2014,"James Marsh",123,"EL",0,1,"","Stephen Hawking e la moglie Jane."],
+["The Imitation Game","",2014,"Morten Tyldum",114,"EP",0,2,"","Alan Turing decifra il codice Enigma."],
+["Green Book","",2018,"Peter Farrelly",130,"RE",0,2,"","Un buttafuori italoamericano accompagna un pianista nero nel Sud."],
+["Bohemian Rhapsody","",2018,"Bryan Singer",134,"E",0,2,"","Freddie Mercury e i Queen fino al Live Aid."],
+["Gravity","",2013,"Alfonso Cuarón",91,"AS",0,2,"","Due astronauti alla deriva nello spazio."],
+["Roma","",2018,"Alfonso Cuarón",135,"E",0,1,"N","Un anno di vita di una domestica a Città del Messico."],
+["I figli degli uomini","Children of Men",2006,"Alfonso Cuarón",109,"AP",0,1,"","In un mondo dove non nascono più bambini, una donna è incinta."],
+["Sicario","",2015,"Denis Villeneuve",121,"AB",0,1,"","Un'agente FBI in un'operazione contro i cartelli messicani."],
+["Incendies - La donna che canta","Incendies",2010,"Denis Villeneuve",131,"EP",0,0,"","Due gemelli scoprono il passato della madre in Medio Oriente."],
+["Birdman","",2014,"Alejandro González Iñárritu",119,"RP",0,1,"","Un ex divo dei supereroi tenta il rilancio a Broadway."],
+["Revenant - Redivivo","The Revenant",2015,"Alejandro González Iñárritu",156,"AE",0,2,"","Un trapper abbandonato in fin di vita cerca vendetta."],
+["Sopravvissuto - The Martian","The Martian",2015,"Ridley Scott",144,"RS",1,2,"","Un astronauta abbandonato su Marte deve coltivare patate."],
+["Il gladiatore II","Gladiator II",2024,"Ridley Scott",148,"A",0,2,"","Il nipote di Marco Aurelio combatte nell'arena."],
+["Black Hawk Down","",2001,"Ridley Scott",144,"A",0,1,"","Soldati americani intrappolati a Mogadiscio."],
+["Ex Machina","",2014,"Alex Garland",108,"PB",0,1,"","Un programmatore deve valutare se un robot è cosciente."],
+["Annientamento","Annihilation",2018,"Alex Garland",115,"BP",0,1,"N","Una spedizione entra in una zona dove la natura muta."],
+["Civil War","",2024,"Alex Garland",109,"AP",0,1,"","Quattro reporter attraversano un'America in guerra civile."],
+["Edge of Tomorrow - Senza domani","Edge of Tomorrow",2014,"Doug Liman",113,"AS",0,1,"","Un soldato rivive in loop lo stesso giorno di battaglia."],
+["The Bourne Ultimatum","",2007,"Paul Greengrass",115,"A",0,1,"","Jason Bourne scopre chi l'ha trasformato in un'arma."],
+["Mission: Impossible - Fallout","",2018,"Christopher McQuarrie",147,"A",0,2,"","Ethan Hunt deve recuperare plutonio rubato."],
+["Kingsman - Secret Service","Kingsman: The Secret Service",2014,"Matthew Vaughn",129,"RA",0,1,"","Un ragazzo di periferia reclutato da un'agenzia segreta elegante."],
+["Baby Driver - Il genio della fuga","Baby Driver",2017,"Edgar Wright",113,"AR",0,1,"","Un giovane autista per rapine guida a ritmo di musica."],
+["L'alba dei morti dementi","Shaun of the Dead",2004,"Edgar Wright",99,"RB",0,1,"","Un commesso svogliato affronta un'apocalisse zombie a Londra."],
+["Hot Fuzz","",2007,"Edgar Wright",121,"RA",0,1,"","Un poliziotto modello trasferito in un paesino troppo tranquillo."],
+["Benvenuti a Zombieland","Zombieland",2009,"Ruben Fleischer",88,"RB",0,1,"","Quattro sopravvissuti in un'America invasa dagli zombie."],
+["Suxbad - Tre menti sopra il pelo","Superbad",2007,"Greg Mottola",113,"R",0,1,"","Due amici vogliono una festa memorabile prima del college."],
+["Le amiche della sposa","Bridesmaids",2011,"Paul Feig",125,"R",0,1,"","Una damigella d'onore in crisi rovina ogni preparativo."],
+["Ti presento i miei","Meet the Parents",2000,"Jay Roach",108,"R",1,2,"","Un infermiere conosce i genitori della fidanzata, e il padre è un ex CIA."],
+["Zoolander","",2001,"Ben Stiller",89,"R",0,1,"","Un modello stupidissimo viene programmato per un omicidio."],
+["I Tenenbaum","The Royal Tenenbaums",2001,"Wes Anderson",110,"RE",0,1,"","Un padre assente tenta di riconquistare la famiglia di geni falliti."],
+["Moonrise Kingdom - Una fuga d'amore","Moonrise Kingdom",2012,"Wes Anderson",94,"RL",1,1,"","Due dodicenni fuggono insieme su un'isola del New England."],
+["Fantastic Mr. Fox","",2009,"Wes Anderson",87,"RS",1,1,"","Una volpe torna a rubare polli e scatena tre contadini."],
+["Ricomincio da capo","Groundhog Day",1993,"Harold Ramis",101,"RL",1,2,"","Un meteorologo rivive all'infinito lo stesso giorno."],
+["Scemo & più scemo","Dumb and Dumber",1994,"Peter Farrelly",107,"R",0,2,"","Due amici stupidi attraversano l'America per restituire una valigetta."],
+["The Mask - Da zero a mito","The Mask",1994,"Chuck Russell",101,"RS",1,2,"","Un impiegato timido trova una maschera che lo trasforma."],
+["Mrs. Doubtfire - Mammo per sempre","Mrs. Doubtfire",1993,"Chris Columbus",125,"R",1,2,"","Un padre divorziato si traveste da tata per stare con i figli."],
+["Jumanji","",1995,"Joe Johnston",104,"AS",1,2,"","Un gioco da tavolo libera giungla e animali in casa."],
+["Jumanji - Benvenuti nella giungla","Jumanji: Welcome to the Jungle",2017,"Jake Kasdan",119,"RA",1,2,"","Quattro ragazzi risucchiati in un videogioco nei panni di avatar."],
+["Men in Black","",1997,"Barry Sonnenfeld",98,"RA",1,2,"","Due agenti segreti sorvegliano gli alieni sulla Terra."],
+["The Others","",2001,"Alejandro Amenábar",101,"B",0,1,"","Una madre e due figli fotosensibili in una villa isolata."],
+["Mare dentro","Mar adentro",2004,"Alejandro Amenábar",125,"EP",0,1,"","Un uomo tetraplegico lotta per il diritto di morire."],
+["It","",2017,"Andy Muschietti",135,"B",0,2,"","Un gruppo di ragazzini contro il clown Pennywise."],
+["L'evocazione - The Conjuring","The Conjuring",2013,"James Wan",112,"B",0,2,"","Due investigatori del paranormale in una casa infestata."],
+["Saw - L'enigmista","Saw",2004,"James Wan",103,"B",0,1,"","Due uomini incatenati in un bagno e un gioco crudele."],
+["Nope","",2022,"Jordan Peele",130,"BS",0,1,"","Due fratelli in un ranch notano qualcosa nel cielo."],
+["Noi","Us",2019,"Jordan Peele",116,"B",0,1,"","Una famiglia in vacanza affronta i propri doppi."],
+["Smile","",2022,"Parker Finn",115,"B",0,1,"","Una psichiatra è perseguitata da un sorriso maledetto."],
+["Talk to Me","",2022,"Danny e Michael Philippou",95,"B",0,1,"","Ragazzi usano una mano imbalsamata per parlare con i morti."],
+["Barbarian","",2022,"Zach Cregger",102,"B",0,1,"","Una casa affittata due volte nasconde una cantina."],
+["The Witch","",2015,"Robert Eggers",92,"B",0,1,"","Una famiglia puritana isolata ai margini di un bosco."],
+["Rec","[REC]",2007,"Jaume Balagueró, Paco Plaza",78,"B",0,1,"","Una reporter in un condominio sigillato dalla polizia."],
+["Suspiria","",1977,"Dario Argento",99,"B",0,1,"","Una ballerina americana in un'accademia di danza tedesca."],
+["Profondo rosso","",1975,"Dario Argento",127,"B",0,2,"","Un pianista testimone di un omicidio indaga da solo."],
+["La notte dei morti viventi","Night of the Living Dead",1968,"George A. Romero",96,"B",0,1,"","Sconosciuti barricati in una casa assediata dai morti."],
+["Non aprite quella porta","The Texas Chain Saw Massacre",1974,"Tobe Hooper",83,"B",0,1,"","Cinque ragazzi incontrano una famiglia cannibale in Texas."],
+["Cube - Il cubo","Cube",1997,"Vincenzo Natali",90,"BP",0,0,"","Sei sconosciuti in un labirinto di stanze trappola."],
+["Split","",2016,"M. Night Shyamalan",117,"B",0,1,"","Tre ragazze rapite da un uomo con 23 personalità."],
+["Nightcrawler - Lo sciacallo","Nightcrawler",2014,"Dan Gilroy",117,"BP",0,1,"","Un uomo senza scrupoli filma incidenti per i notiziari."],
+["Uncut Gems","",2019,"Josh e Benny Safdie",135,"A",0,1,"N","Un gioielliere indebitato scommette tutto su una pietra."],
+["Il sospetto","Jagten",2012,"Thomas Vinterberg",115,"PE",0,1,"","Un maestro d'asilo accusato ingiustamente dalla comunità."],
+["Un altro giro","Druk",2020,"Thomas Vinterberg",117,"RE",0,1,"","Quattro professori sperimentano di bere ogni giorno."],
+["Le vite degli altri","Das Leben der Anderen",2006,"Florian Henckel von Donnersmarck",137,"EP",0,1,"","Un agente della Stasi spia una coppia di artisti."],
+["Il segreto dei suoi occhi","El secreto de sus ojos",2009,"Juan José Campanella",129,"BLE",0,1,"","Un ex funzionario riapre un vecchio caso di omicidio."],
+["Una separazione","Jodaeiye Nader az Simin",2011,"Asghar Farhadi",123,"EP",0,0,"","Una coppia di Teheran in crisi e un incidente con la badante."],
+["Ritratto della giovane in fiamme","Portrait de la jeune fille en feu",2019,"Céline Sciamma",122,"LE",0,1,"","Una pittrice deve ritrarre di nascosto una giovane promessa sposa."],
+["La vita di Adele","La Vie d'Adèle",2013,"Abdellatif Kechiche",180,"LE",0,1,"","Il primo grande amore di una liceale per una ragazza dai capelli blu."],
+["Il profeta","Un prophète",2009,"Jacques Audiard",155,"A",0,0,"","Un giovane detenuto diventa un boss in prigione."],
+["Volver","",2006,"Pedro Almodóvar",121,"ER",0,1,"","Tre generazioni di donne e il ritorno di una madre morta."],
+["Tutto su mia madre","Todo sobre mi madre",1999,"Pedro Almodóvar",101,"E",0,1,"","Una madre cerca il padre del figlio morto a Barcellona."],
+["Dolor y gloria","",2019,"Pedro Almodóvar",113,"E",0,0,"","Un regista malato ripercorre infanzia e amori."],
+["Memorie di un assassino","Salinui chueok",2003,"Bong Joon-ho",132,"BP",0,1,"","Due poliziotti a caccia del primo serial killer coreano."],
+["Okja","",2017,"Bong Joon-ho",120,"SE",1,1,"N","Una bambina coreana difende il suo maialone gigante da una multinazionale."],
+["Burning - L'amore brucia","Beoning",2018,"Lee Chang-dong",148,"BP",0,0,"","Un giovane, un'amica d'infanzia e un ricco misterioso."],
+["Decision to Leave","",2022,"Park Chan-wook",138,"LB",0,0,"","Un detective si innamora della vedova sospettata."],
+["Mademoiselle","Agassi",2016,"Park Chan-wook",145,"LB",0,1,"","Una truffa ai danni di un'ereditiera nella Corea occupata."],
+["Hero","Ying xiong",2002,"Zhang Yimou",99,"AS",0,1,"","Un guerriero racconta al re come ha sconfitto tre assassini."],
+["La tigre e il dragone","Wo hu cang long",2000,"Ang Lee",120,"AS",0,1,"","Una spada rubata e duelli sui tetti della Cina antica."],
+["In the Mood for Love","Fa yeung nin wa",2000,"Wong Kar-wai",98,"L",0,1,"","Due vicini di casa scoprono che i loro coniugi li tradiscono."],
+["Drive My Car","",2021,"Ryūsuke Hamaguchi",179,"EP",0,0,"","Un regista teatrale vedovo e la sua giovane autista."],
+["Un affare di famiglia","Manbiki kazoku",2018,"Hirokazu Kore-eda",121,"E",0,0,"","Una famiglia di taccheggiatori accoglie una bambina."],
+["L'innocenza","Kaibutsu",2023,"Hirokazu Kore-eda",126,"EP",0,0,"","Lo stesso episodio a scuola visto da tre punti di vista."],
+["Anatomia di una caduta","Anatomie d'une chute",2023,"Justine Triet",151,"PB",0,1,"","Una scrittrice sotto processo per la morte del marito."],
+["La zona d'interesse","The Zone of Interest",2023,"Jonathan Glazer",105,"P",0,1,"","La vita domestica del comandante di Auschwitz, oltre il muro."],
+["Povere creature!","Poor Things",2023,"Yorgos Lanthimos",141,"SRP",0,1,"D","Una donna riportata in vita scopre il mondo senza regole."],
+["La favorita","The Favourite",2018,"Yorgos Lanthimos",119,"RP",0,1,"D","Due cugine si contendono il favore della regina Anna."],
+["The Holdovers - Lezioni di vita","The Holdovers",2023,"Alexander Payne",133,"RE",0,1,"","Un professore burbero, uno studente e una cuoca a scuola per Natale."],
+["Sideways - In viaggio con Jack","Sideways",2004,"Alexander Payne",127,"RE",0,1,"","Due amici in viaggio tra le cantine della California."],
+["Nebraska","",2013,"Alexander Payne",115,"E",0,0,"","Un padre convinto di aver vinto un milione e il figlio che lo accompagna."],
+["Il filo nascosto","Phantom Thread",2017,"Paul Thomas Anderson",130,"LP",0,1,"","Uno stilista londinese e la musa che lo sfida."],
+["Licorice Pizza","",2021,"Paul Thomas Anderson",133,"LR",0,1,"","Un quindicenne intraprendente e una ventenne nella California del 1973."],
+["Il petroliere","There Will Be Blood",2007,"Paul Thomas Anderson",158,"P",0,1,"","Un petroliere avido nella California di inizio Novecento."],
+["Magnolia","",1999,"Paul Thomas Anderson",188,"E",0,1,"","Un giorno a Los Angeles in cui nove vite si incrociano."],
+["Boyhood","",2014,"Richard Linklater",165,"E",0,1,"","Dodici anni nella vita di un ragazzo, girati davvero in dodici anni."],
+["Prima del tramonto","Before Sunset",2004,"Richard Linklater",80,"L",0,1,"","Nove anni dopo Vienna, Jesse e Céline si ritrovano a Parigi."],
+["Manchester by the Sea","",2016,"Kenneth Lonergan",137,"E",0,1,"","Un uomo torna a casa per occuparsi del nipote dopo un lutto."],
+["Il cigno nero","Black Swan",2010,"Darren Aronofsky",108,"BP",0,2,"","Una ballerina ossessionata dal ruolo perfetto."],
+["The Whale","",2022,"Darren Aronofsky",117,"E",0,1,"","Un insegnante gravemente obeso tenta di riavvicinarsi alla figlia."],
+["Requiem for a Dream","",2000,"Darren Aronofsky",102,"PB",0,1,"","Quattro vite travolte dalla dipendenza."],
+["Tár","",2022,"Todd Field",158,"P",0,0,"","Una celebre direttrice d'orchestra al culmine del potere."],
+["Belfast","",2021,"Kenneth Branagh",98,"E",1,1,"","Un bambino nella Belfast del 1969."],
+["Il potere del cane","The Power of the Dog",2021,"Jane Campion",126,"PB",0,1,"N","Un rancher crudele e il figlio della nuova cognata."],
+["Enola Holmes","",2020,"Harry Bradbeer",123,"RS",1,1,"N","La sorella di Sherlock cerca la madre scomparsa."],
+["Bird Box","",2018,"Susanne Bier",124,"B",0,2,"N","Una madre e due bambini bendati in fuga lungo un fiume."],
+["Tick, Tick... Boom!","",2021,"Lin-Manuel Miranda",115,"E",0,1,"N","Un compositore a un passo dai trent'anni cerca il successo."],
+["Il processo ai Chicago 7","The Trial of the Chicago 7",2020,"Aaron Sorkin",130,"P",0,1,"N","Il processo agli attivisti contro la guerra del 1968."],
+["Il mondo dietro di te","Leave the World Behind",2023,"Sam Esmail",141,"BP",0,1,"N","Una vacanza interrotta da un blackout misterioso."],
+["Il mostro dei mari","The Sea Beast",2022,"Chris Williams",115,"AS",1,1,"N","Un cacciatore di mostri marini e una bambina scoprono la verità."],
+["Nimona","",2023,"Nick Bruno, Troy Quane",101,"ARS",1,1,"N","Un cavaliere caduto in disgrazia e una mutaforma ribelle."],
+["I Mitchell contro le macchine","The Mitchells vs. the Machines",2021,"Mike Rianda",114,"RS",1,1,"N","Una famiglia strampalata contro una rivolta dei robot."],
+["Wallace & Gromit - Le piume della vendetta","Wallace & Gromit: Vengeance Most Fowl",2024,"Nick Park, Merlin Crossingham",79,"RS",1,1,"N","Il pinguino Feathers McGraw torna a vendicarsi."],
+["Leo","",2023,"Robert Smigel",102,"R",1,1,"N","Una lucertola di classe aiuta i bambini con i loro problemi."],
+["Tyler Rake","Extraction",2020,"Sam Hargrave",116,"A",0,2,"N","Un mercenario deve salvare il figlio rapito di un boss."],
+["The Old Guard","",2020,"Gina Prince-Bythewood",125,"A",0,1,"N","Un gruppo di guerrieri immortali scopre una nuova compagna."],
+["Il diritto di contare","Hidden Figures",2016,"Theodore Melfi",127,"E",1,1,"D","Tre matematiche nere decisive per la NASA."],
+["Hachiko - Il tuo migliore amico","Hachi: A Dog's Tale",2009,"Lasse Hallström",93,"E",1,2,"","Un cane aspetta ogni giorno il padrone alla stazione."],
+["Il sapore della vittoria","Remember the Titans",2000,"Boaz Yakin",113,"E",1,1,"D","Una squadra di football unisce bianchi e neri in Virginia."],
+["Moneyball - L'arte di vincere","Moneyball",2011,"Bennett Miller",133,"P",0,1,"","Un dirigente rivoluziona il baseball con le statistiche."],
+["Creed - Nato per combattere","Creed",2015,"Ryan Coogler",133,"EA",0,1,"","Il figlio di Apollo Creed chiede a Rocky di allenarlo."],
+["Warrior","",2011,"Gavin O'Connor",140,"EA",0,1,"","Due fratelli si ritrovano sul ring di arti marziali."],
+["Pride","",2014,"Matthew Warchus",120,"RE",0,1,"","Attivisti gay londinesi sostengono i minatori in sciopero."],
+["Billy Elliot","",2000,"Stephen Daldry",110,"E",1,2,"","Il figlio di un minatore sogna di fare danza classica."],
+["Full Monty - Squattrinati organizzati","The Full Monty",1997,"Peter Cattaneo",91,"R",0,1,"","Operai disoccupati di Sheffield improvvisano uno spogliarello."],
+["Quattro matrimoni e un funerale","Four Weddings and a Funeral",1994,"Mike Newell",117,"RL",0,1,"","Un inglese incontra la stessa americana a una serie di matrimoni."],
+["Paddington","",2014,"Paul King",95,"R",1,1,"","Un orsetto peruviano arriva a Londra e trova una famiglia."],
+["Wonka","",2023,"Paul King",116,"SR",1,1,"","Il giovane Willy Wonka sogna di aprire la sua cioccolateria."],
+["Frances Ha","",2012,"Noah Baumbach",86,"R",0,0,"","Una ballerina ventisettenne a New York senza piano preciso."],
+["Un sogno chiamato Florida","The Florida Project",2017,"Sean Baker",111,"E",0,0,"","Un'estate di una bambina in un motel vicino a Disney World."],
+["Minari","",2020,"Lee Isaac Chung",115,"E",1,0,"","Una famiglia coreana prova a coltivare l'Arkansas."],
+["The Farewell - Una bugia buona","The Farewell",2019,"Lulu Wang",100,"RE",0,0,"","Una famiglia nasconde alla nonna la sua malattia."],
+["Free Guy - Eroe per gioco","Free Guy",2021,"Shawn Levy",115,"RA",1,1,"D","Un personaggio di sfondo di un videogioco prende coscienza."],
+["Una notte al museo","Night at the Museum",2006,"Shawn Levy",108,"RS",1,2,"D","Un guardiano notturno scopre che le statue si animano."],
+["Elf - Un elfo di nome Buddy","Elf",2003,"Jon Favreau",97,"R",1,1,"","Un uomo cresciuto dagli elfi cerca il vero padre a New York."],
+["Chef - La ricetta perfetta","Chef",2014,"Jon Favreau",114,"RE",0,1,"","Un cuoco licenziato riparte con un food truck."],
+["Polar Express","The Polar Express",2004,"Robert Zemeckis",100,"S",1,1,"","Un treno magico porta un bambino al Polo Nord."],
+["Il Grinch","How the Grinch Stole Christmas",2000,"Ron Howard",104,"R",1,2,"","Una creatura scorbutica vuole rubare il Natale."],
+["L'amore non va in vacanza","The Holiday",2006,"Nancy Meyers",136,"LR",0,2,"","Due donne si scambiano casa per Natale."],
+["Gremlins","",1984,"Joe Dante",106,"RB",0,1,"","Un regalo di Natale con tre regole da non infrangere."],
+["Chi ha incastrato Roger Rabbit","Who Framed Roger Rabbit",1988,"Robert Zemeckis",104,"RS",1,1,"D","Un detective aiuta un coniglio dei cartoni accusato di omicidio."],
+["Hook - Capitan Uncino","Hook",1991,"Steven Spielberg",142,"S",1,1,"","Peter Pan, cresciuto, torna all'Isola che non c'è."],
+["La mummia","The Mummy",1999,"Stephen Sommers",124,"AS",1,2,"","Un avventuriero risveglia una mummia egizia."],
+["Ocean's Eleven - Fate il vostro gioco","Ocean's Eleven",2001,"Steven Soderbergh",116,"RA",0,2,"","Undici esperti rapinano tre casinò di Las Vegas."],
+["Il talento di Mr. Ripley","The Talented Mr. Ripley",1999,"Anthony Minghella",139,"BP",0,1,"","Un giovane americano in Italia si appropria della vita di un altro."],
+["Il paziente inglese","The English Patient",1996,"Anthony Minghella",162,"LE",0,1,"","Un uomo ustionato ricorda un amore nel deserto."],
+["Fury","",2014,"David Ayer",134,"A",0,1,"","L'equipaggio di un carro armato nelle ultime settimane di guerra."],
+["La grande scommessa","The Big Short",2015,"Adam McKay",130,"RP",0,1,"","Chi aveva previsto il crollo finanziario del 2008."],
+["Margin Call","",2011,"J.C. Chandor",107,"P",0,0,"","Una notte in una banca d'affari alla vigilia della crisi."],
+["Sound of Metal","",2019,"Darius Marder",120,"E",0,0,"P","Un batterista metal sta perdendo l'udito."],
+["Dallas Buyers Club","",2013,"Jean-Marc Vallée",117,"E",0,1,"","Un elettricista malato di AIDS contrabbanda farmaci."],
+["Philadelphia","",1993,"Jonathan Demme",125,"E",0,2,"","Un avvocato licenziato perché malato di AIDS fa causa."],
+["Hotel Rwanda","",2004,"Terry George",121,"E",0,1,"","Un direttore d'albergo salva centinaia di persone dal genocidio."],
+["Il bambino con il pigiama a righe","The Boy in the Striped Pyjamas",2008,"Mark Herman",94,"E",1,2,"","Il figlio di un comandante nazista fa amicizia oltre il filo spinato."],
+["Train de vie - Un treno per vivere","Train de vie",1998,"Radu Mihăileanu",103,"RE",0,0,"","Un villaggio ebreo finge una deportazione per fuggire."],
+["Paterson","",2016,"Jim Jarmusch",118,"P",0,0,"","Una settimana di un autista di autobus che scrive poesie."],
+["Gattaca - La porta dell'universo","Gattaca",1997,"Andrew Niccol",106,"P",0,1,"","Un uomo nato senza selezione genetica sogna lo spazio."],
+["Moon","",2009,"Duncan Jones",97,"P",0,0,"","Un astronauta alla fine di tre anni da solo sulla Luna."],
+["Source Code","",2011,"Duncan Jones",93,"AP",0,1,"","Un soldato rivive otto minuti per fermare un attentato."],
+["District 9","",2009,"Neill Blomkamp",112,"AP",0,1,"","Alieni rifugiati in una baraccopoli di Johannesburg."],
+["Looper","",2012,"Rian Johnson",119,"AP",0,1,"","Un killer deve eliminare se stesso arrivato dal futuro."],
+["Jurassic World","",2015,"Colin Trevorrow",124,"A",1,2,"","Il parco dei dinosauri riapre, e un ibrido scappa."],
+["Apes Revolution - Il pianeta delle scimmie","Dawn of the Planet of the Apes",2014,"Matt Reeves",130,"A",0,1,"D","Scimmie e umani sopravvissuti sull'orlo della guerra."],
+["Godzilla Minus One","",2023,"Takashi Yamazaki",125,"AE",0,1,"","Nel Giappone del dopoguerra arriva Godzilla."],
+["Furiosa - A Mad Max Saga","Furiosa: A Mad Max Saga",2024,"George Miller",148,"A",0,1,"","La giovane Furiosa rapita e la sua lunga vendetta."],
+["Longlegs","",2024,"Oz Perkins",101,"B",0,1,"","Un'agente FBI con intuizioni insolite e un killer satanico."],
+["La sala professori","Das Lehrerzimmer",2023,"İlker Çatak",99,"PB",0,0,"","Un'insegnante indaga sui furti a scuola e perde il controllo."],
+["Air - La storia del grande salto","Air",2023,"Ben Affleck",112,"E",0,1,"P","Nike e la scommessa su un giovane Michael Jordan."],
+["Argo","",2012,"Ben Affleck",120,"BA",0,1,"","Un agente CIA finge di girare un film per salvare ostaggi a Teheran."],
+["A Star Is Born","",2018,"Bradley Cooper",136,"LE",0,2,"","Una cantante sconosciuta e una rockstar al tramonto."],
+["Elvis","",2022,"Baz Luhrmann",159,"E",0,1,"","La vita di Elvis Presley vista dal suo manager."],
+["Il grande Gatsby","The Great Gatsby",2013,"Baz Luhrmann",143,"LE",0,2,"","Feste sfarzose e un amore perduto a Long Island."],
+["Moulin Rouge!","",2001,"Baz Luhrmann",127,"LE",0,1,"","Uno scrittore e una cortigiana a Parigi nel 1899."],
+["The Greatest Showman","",2017,"Michael Gracey",105,"SE",1,2,"D","P.T. Barnum e la nascita del circo moderno."],
+["Sing Street","",2016,"John Carney",106,"RLE",0,0,"","Un ragazzo di Dublino fonda una band per conquistare una ragazza."],
+["Once","",2007,"John Carney",86,"LE",0,0,"","Un musicista di strada e un'immigrata ceca scrivono canzoni."],
+["Tutto può cambiare","Begin Again",2013,"John Carney",104,"LE",0,1,"","Una cantautrice e un produttore in crisi registrano per New York."],
+["Julie & Julia","",2009,"Nora Ephron",123,"RE",0,1,"","Una blogger cucina tutte le ricette di Julia Child."],
+["C'è posta per te","You've Got Mail",1998,"Nora Ephron",119,"LR",0,2,"","Due rivali in affari si innamorano via email."],
+["Insonnia d'amore","Sleepless in Seattle",1993,"Nora Ephron",105,"L",0,1,"","Un bambino chiama la radio per trovare una moglie al padre."],
+["Tutti pazzi per Mary","There's Something About Mary",1998,"Bobby e Peter Farrelly",119,"RL",0,2,"","Un uomo ritrova la ragazza del liceo, ma non è il solo."],
+["Il matrimonio del mio migliore amico","My Best Friend's Wedding",1997,"P.J. Hogan",105,"LR",0,1,"","Una donna vuole impedire il matrimonio del suo migliore amico."],
+["10 cose che odio di te","10 Things I Hate About You",1999,"Gil Junger",97,"LR",0,1,"","Un ragazzo viene pagato per corteggiare la ribelle del liceo."],
+["Mean Girls","",2004,"Mark Waters",97,"R",0,2,"","Una nuova arrivata si infiltra nel gruppo delle ragazze più popolari."],
+["Ragazze a Beverly Hills","Clueless",1995,"Amy Heckerling",97,"R",0,1,"","Una liceale viziata gioca a sistemare la vita degli altri."],
+["Easy Girl","Easy A",2010,"Will Gluck",92,"R",0,1,"","Una studentessa lascia credere di avere una cattiva reputazione."],
+["Tutti tranne te","Anyone but You",2023,"Will Gluck",103,"LR",0,1,"","Due ex che si odiano fingono di stare insieme a un matrimonio."],
+["Crazy & Rich","Crazy Rich Asians",2018,"Jon M. Chu",120,"LR",0,1,"","Una professoressa scopre che il fidanzato è ricchissimo."],
+["Searching","",2018,"Aneesh Chaganty",102,"B",0,1,"","Un padre cerca la figlia scomparsa attraverso il suo computer."],
+["In Bruges - La coscienza dell'assassino","In Bruges",2008,"Martin McDonagh",107,"RB",0,1,"","Due sicari nascosti a Bruges in attesa di ordini."],
+["Wonder","",2017,"Stephen Chbosky",113,"E",1,1,"","Un bambino con il volto segnato affronta la prima media."],
+["Noi siamo infinito","The Perks of Being a Wallflower",2012,"Stephen Chbosky",102,"E",0,1,"","Un liceale timido trova due amici che gli cambiano la vita."],
+["Colpa delle stelle","The Fault in Our Stars",2014,"Josh Boone",126,"LE",0,2,"","Due ragazzi malati si innamorano e partono per Amsterdam."],
+["Persepolis","",2007,"Marjane Satrapi, Vincent Paronnaud",96,"EP",0,1,"","Una bambina cresce nell'Iran della rivoluzione."],
+["RRR","",2022,"S.S. Rajamouli",187,"AE",0,1,"N","Due rivoluzionari indiani contro l'impero britannico.",1],
+["Demon Slayer - Il Castello dell'Infinito: Parte 1","Kimetsu no Yaiba: Mugen-jō-hen",2025,"Haruo Sotozaki",155,"AS",0,2,"N","Tanjiro e gli ammazzademoni nel castello di Muzan.",1],
+// Animazione
+["Alla ricerca di Nemo","Finding Nemo",2003,"Andrew Stanton",100,"SER",1,2,"D","Un pesce pagliaccio attraversa l'oceano per ritrovare il figlio."],
+["Toy Story - Il mondo dei giocattoli","Toy Story",1995,"John Lasseter",81,"RS",1,2,"D","Woody si sente minacciato dall'arrivo di Buzz Lightyear."],
+["Toy Story 3 - La grande fuga","Toy Story 3",2010,"Lee Unkrich",103,"ER",1,2,"D","Andy va al college e i giocattoli finiscono in un asilo."],
+["Monsters & Co.","Monsters, Inc.",2001,"Pete Docter",92,"RS",1,2,"D","Due mostri spaventatori e una bambina umana."],
+["Frozen - Il regno di ghiaccio","Frozen",2013,"Chris Buck, Jennifer Lee",102,"SE",1,2,"D","Anna cerca la sorella Elsa che ha congelato il regno."],
+["Oceania","Moana",2016,"Ron Clements, John Musker",107,"SA",1,2,"D","Vaiana attraversa l'oceano con il semidio Maui."],
+["Rapunzel - L'intreccio della torre","Tangled",2010,"Nathan Greno, Byron Howard",100,"SRL",1,2,"D","Una ragazza dai capelli lunghissimi lascia la torre."],
+["La bella e la bestia","Beauty and the Beast",1991,"Gary Trousdale, Kirk Wise",84,"LS",1,2,"D","Belle e una bestia in un castello incantato."],
+["Aladdin","",1992,"Ron Clements, John Musker",90,"SR",1,2,"D","Un ladruncolo trova una lampada con un genio."],
+["Zootropolis","Zootopia",2016,"Byron Howard, Rich Moore",108,"RS",1,2,"D","Una coniglietta poliziotta e una volpe truffatrice indagano."],
+["Big Hero 6","",2014,"Don Hall, Chris Williams",102,"ARS",1,1,"D","Un ragazzo prodigio e il suo robot infermiere diventano eroi."],
+["Dragon Trainer","How to Train Your Dragon",2010,"Dean DeBlois, Chris Sanders",98,"AS",1,2,"","Un giovane vichingo fa amicizia con un drago."],
+["Kung Fu Panda","",2008,"Mark Osborne, John Stevenson",92,"RA",1,2,"","Un panda goffo viene scelto come Guerriero Dragone."],
+["Cattivissimo me","Despicable Me",2010,"Pierre Coffin, Chris Renaud",95,"R",1,2,"","Un supercattivo adotta tre orfanelle per un piano."],
+["Il castello errante di Howl","Hauru no ugoku shiro",2004,"Hayao Miyazaki",119,"SL",1,2,"N","Una ragazza trasformata in anziana e un mago misterioso.",1],
+["Principessa Mononoke","Mononoke-hime",1997,"Hayao Miyazaki",134,"SA",0,1,"N","Un principe maledetto tra gli dei della foresta e gli uomini.",1],
+["Kiki - Consegne a domicilio","Majo no takkyūbin",1989,"Hayao Miyazaki",103,"S",1,1,"N","Una giovane strega apre un servizio di consegne volanti.",1],
+["Ponyo sulla scogliera","Gake no ue no Ponyo",2008,"Hayao Miyazaki",101,"S",1,1,"N","Un pesciolino rosso vuole diventare una bambina.",1],
+["Si alza il vento","Kaze tachinu",2013,"Hayao Miyazaki",126,"EL",1,0,"N","L'ingegnere che sognava di costruire aerei.",1],
+["Your Name.","Kimi no na wa.",2016,"Makoto Shinkai",106,"LSE",1,1,"","Due ragazzi sconosciuti si scambiano i corpi nel sonno."],
+["La forma della voce","Koe no katachi",2016,"Naoko Yamada",130,"E",0,0,"","Un ex bullo cerca il perdono della compagna sorda."],
+["Akira","",1988,"Katsuhiro Otomo",124,"AS",0,1,"","Neo-Tokyo, bande di motociclisti e un potere incontrollabile."],
+["Perfect Blue","",1997,"Satoshi Kon",81,"BP",0,0,"","Una pop star diventa attrice e perde il confine con la realtà."],
+["La tomba delle lucciole","Hotaru no haka",1988,"Isao Takahata",89,"E",0,1,"","Due fratellini sopravvivono da soli nel Giappone in guerra."],
+["Il gigante di ferro","The Iron Giant",1999,"Brad Bird",86,"SE",1,1,"","Un bambino nasconde un robot gigante caduto dal cielo."],
+["Coraline e la porta magica","Coraline",2009,"Henry Selick",100,"SB",1,1,"","Una bambina trova una porta verso una casa troppo perfetta."],
+["Wolfwalkers - Il popolo dei lupi","Wolfwalkers",2020,"Tomm Moore, Ross Stewart",103,"SE",1,0,"","Una bambina cacciatrice fa amicizia con una ragazza lupo."],
+["Spider-Man: Across the Spider-Verse","",2023,"Joaquim Dos Santos, Kemp Powers, Justin Thompson",140,"ASE",1,2,"","Miles Morales attraversa il multiverso e sfida la Spider-Society."],
+["Il Gatto con gli Stivali 2 - L'ultimo desiderio","Puss in Boots: The Last Wish",2022,"Joel Crawford",102,"ARS",1,1,"","Il Gatto ha usato otto vite e cerca la Stella dei desideri."],
+["Super Mario Bros. - Il film","The Super Mario Bros. Movie",2023,"Aaron Horvath, Michael Jelenic",92,"RS",1,2,"","Due idraulici di Brooklyn nel Regno dei Funghi."],
+["Shrek 2","",2004,"Andrew Adamson",93,"RS",1,2,"","Shrek conosce i genitori di Fiona."]
+];
+RAW.push(...WEB, ...MORE);
+const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48);
+const toFilm = r => ({id:slug(r[0])+"-"+r[2], t:String(r[0]), o:String(r[1]||""), y:Number(r[2])||0, d:String(r[3]||""), m:Number(r[4])||0,
+  moods:String(r[5]||"").split("").filter(c=>"REABPSL".includes(c)), k:!!r[6], p:Math.max(0,Math.min(2,Number(r[7])||0)), w:String(r[8]||""), b:String(r[9]||""), v:!!r[10]});
+const FILMS = [], BYID = {};
+function addFilm(r){ try{ const f = toFilm(r); if(!f.t || !f.y || !f.moods.length || BYID[f.id]) return false; FILMS.push(f); BYID[f.id]=f; return true; }catch(e){ return false; } }
+RAW.forEach(addFilm);
+/* Disponibilità aggiornate dalla ricerca di ottobre 2026 per titoli già in catalogo */
+const PATCH = {"interstellar-2014":["N",1],"quasi-amici-2011":["N",1],"storia-di-un-matrimonio-2019":["N",1],
+  "il-signore-degli-anelli-la-compagnia-dell-anello-2001":["N",1],"harry-potter-e-la-pietra-filosofale-2001":["H",0],
+  "dune-2021":["H",1],"superman-2025":["H",1],"weapons-2025":["H",1]};
+Object.entries(PATCH).forEach(([id,[w,v]])=>{ if(BYID[id]){ BYID[id].w=w; BYID[id].v=!!v; } });
+const WHERE = {N:"Netflix", P:"Prime Video", D:"Disney+", H:"HBO Max", A:"Apple TV+"};
+const MOOD = {R:"Da ridere", E:"Emozionante", A:"Adrenalina", B:"Brivido", P:"Fa pensare", S:"Evasione", L:"Romantico"};
+const HUE = {R:42, E:352, A:16, B:278, P:192, S:232, L:322};
+
+/* ---------- Domande ---------- */
+const QUESTIONS = [
+  {key:"mood", q:"Che voglia hai stasera?", hint:"Scegli tutte le risposte che ti vanno bene.", opts:[
+    ["R","Ridere","commedie e leggerezza"],["E","Emozionarmi","storie che restano dentro"],
+    ["A","Adrenalina","azione e ritmo"],["B","Brivido","thriller e horror"],
+    ["P","Pensare","film da discutere dopo"],["S","Evadere","fantasy, avventura, animazione"],
+    ["L","Romanticismo","storie d'amore"]]},
+  {key:"who", q:"Con chi lo guardi?", hint:"Puoi scegliere più risposte.", opts:[
+    ["solo","Da solo","una serata tutta per me"],["coppia","In coppia","divano per due"],
+    ["amici","Con gli amici","si commenta ad alta voce"],["famiglia","In famiglia","ci sono anche i bambini"]]},
+  {key:"time", q:"Quanto tempo avete?", hint:"Puoi scegliere più risposte: vale la durata più lunga.", opts:[
+    ["short","Poco","fino a circa 1h 50′"],["medium","Il giusto","fino a circa 2h 20′"],["any","Tutta la sera","anche oltre le 3 ore"]]},
+  {key:"era", q:"Di che epoca?", hint:"Puoi scegliere più epoche.", opts:[
+    ["classic","Classici","prima del 1990"],["mid","Anni 90 e 2000","dal 1990 al 2009"],
+    ["recent","Recenti","dal 2010 in poi"],["any","Indifferente","tutto va bene"]]},
+  {key:"pop", q:"Vai sul sicuro o vuoi sorprese?", hint:"Puoi scegliere più risposte.", opts:[
+    ["safe","Sul sicuro","film che conoscono tutti"],["mix","Un po' e un po'","un buon equilibrio"],
+    ["gem","Sorprendimi","titoli meno visti"],["new","Novità in streaming","uscite recenti sulle piattaforme"]]}
+];
+
+/* ---------- Punteggio ---------- */
+const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+function scoreFilm(f, a, jitter){
+  let s = 0; const why = [];
+  const moods = arr(a.mood), who = arr(a.who), time = arr(a.time), era = arr(a.era), pop = arr(a.pop);
+  let hit = 0;
+  moods.forEach(m => { const i = f.moods.indexOf(m); if(i>=0){ s += 7 - i; hit++; why.push(MOOD[m]); } });
+  if(moods.length && !hit) s -= 6;
+  if(who.includes("famiglia")){ if(f.k){ s+=3; why.push("Adatto ai bambini"); } else s -= 25; }
+  if(who.includes("coppia") && f.moods.includes("L")) s += 2;
+  if(who.includes("amici") && (f.moods.includes("R")||f.moods.includes("A"))) s += 2;
+  if(who.includes("solo") && (f.moods.includes("P")||f.moods.includes("E"))) s += 1;
+  /* tempo: vale la scelta più generosa */
+  const limit = time.includes("any") || !time.length ? Infinity : time.includes("medium") ? 142 : 112;
+  const mins = f.m || 115;
+  if(mins > limit) s -= 6 + (mins-limit)/8;
+  else if(limit===112 && f.m) why.push("Dura poco");
+  /* epoca: basta che rientri in una delle epoche scelte */
+  if(era.length && !era.includes("any")){
+    const ok = (era.includes("classic") && f.y<1990) || (era.includes("mid") && f.y>=1990 && f.y<2010) || (era.includes("recent") && f.y>=2010);
+    s += ok ? 4 : -5;
+  }
+  let pb = 0;
+  if(pop.includes("safe")) pb = Math.max(pb, f.p*2);
+  if(pop.includes("gem")) pb = Math.max(pb, (2-f.p)*2.5);
+  if(pop.includes("mix")) pb = Math.max(pb, f.p===1 ? 1.5 : 0.5);
+  if(pop.includes("new")) pb = Math.max(pb, f.v ? 5 : (f.y>=2024 ? 3 : 0));
+  s += pb;
+  if(pop.includes("gem") && f.p===0) why.push("Chicca");
+  if(f.v) why.push("Novità in streaming");
+  s += jitter ? Math.random()*2.2 : 0;
+  return {f, s, why:[...new Set(why)]};
+}
+function rank(a, jitter=true){ return FILMS.map(f=>scoreFilm(f,a,jitter)).sort((x,y)=>y.s-x.s); }
+
+/* ---------- Utilità ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hueOf = f => { let h = HUE[f.moods[0]]||200; for(const c of f.t) h += c.charCodeAt(0)%7; return h%360; };
+const dur = m => m ? `${Math.floor(m/60)}h ${String(m%60).padStart(2,"0")}′` : "durata n.d.";
+const metaLine = (f, long) => [f.y, long ? dur(f.m) : (f.m ? f.m+"′" : null), f.d || null].filter(Boolean).map(esc).join(" · ");
+const jwUrl = f => "https://www.justwatch.com/it/cerca?q=" + encodeURIComponent(f.t.split(" - ")[0]);
+const whereText = f => !f.w ? "Streaming, noleggio o acquisto" : f.v ? `Su ${WHERE[f.w]} · ottobre 2026` : `Di solito su ${WHERE[f.w]}`;
+function store(k,v){ try{ v==null ? localStorage.removeItem(k) : localStorage.setItem(k,v); }catch(e){} }
+function load(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+let toastT; function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,4200); }
+function show(id){ document.querySelectorAll(".view").forEach(v=>v.hidden = v.id!==id); if(state.view!==id) window.scrollTo(0,0); state.view=id; }
+function loading(msg){ $("#loadingMsg").textContent = msg||"Un attimo…"; show("v-loading"); }
+function answerChips(a){
+  const out=[];
+  QUESTIONS.forEach((q,qi)=> arr(a[q.key]).forEach(v=>{ const o=q.opts.find(o=>o[0]===v); if(o) out.push([o[1], qi===0]); }));
+  return out.map(([t,g])=>`<span class="chip${g?" gold":""}">${esc(t)}</span>`).join("");
+}
+
+/* ---------- Stato ---------- */
+const state = {view:"v-home", mode:"solo", answers:{}, qi:0, ranked:[], offset:0, uid:null,
+  code:null, room:null, members:[], channel:null, poll:null,
+  myVotes:{}, votesLoaded:false, writing:false, dirty:false, animating:false, shownFilm:null};
+
+$("#homeEyebrow").textContent = `Sala buia · ${FILMS.length} film in programmazione`;
+
+/* ---------- Home ---------- */
+$("#brand").onclick = () => { if(state.code){ if(state.room && state.room.status==="done") { leaveRoom(); show("v-home"); } else routeRoom(); } else show("v-home"); };
+$("#goSolo").onclick = () => startQuiz("solo");
+$("#goGroup").onclick = () => { if(getNick()) startQuiz("group"); };
+$("#codeInput").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,""); $("#joinErr").hidden=true; });
+$("#joinForm").addEventListener("submit", e => { e.preventDefault(); const c=$("#codeInput").value.trim(); if(c.length!==5){ joinError("Il codice ha 5 caratteri."); return; } joinRoom(c); });
+function joinError(m){ const el=$("#joinErr"); el.textContent=m; el.hidden=false; }
+
+
+/* ---------- Quiz ---------- */
+function startQuiz(mode){ state.mode=mode; state.answers={}; state.qi=0; renderQ(); show("v-quiz"); }
+function renderQ(){
+  const q = QUESTIONS[state.qi], n=QUESTIONS.length;
+  $("#qCount").textContent = `${state.mode==="group"?"Gusti del gruppo · ":""}Domanda ${state.qi+1} di ${n}`;
+  $("#qBar").style.width = ((state.qi+1)/n*100)+"%";
+  $("#qTitle").textContent = q.q; $("#qHint").textContent = q.hint;
+  const cur = state.answers[q.key] || [];
+  $("#qOpts").innerHTML = q.opts.map(o=>{
+    const on = cur.includes(o[0]);
+    return `<button type="button" class="opt" data-v="${o[0]}" aria-pressed="${on}"><b>${esc(o[1])}</b><small>${esc(o[2]||"")}</small></button>`;
+  }).join("");
+  $("#qBack").textContent = state.qi===0 ? "Annulla" : "Indietro";
+  const last = state.qi===n-1;
+  $("#qNext").textContent = last ? (state.mode==="group" ? "Crea la serata" : "Vedi i film") : "Avanti";
+  $("#qNext").disabled = !cur.length;
+}
+$("#qOpts").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  const q = QUESTIONS[state.qi], v=b.dataset.v;
+  let a = [...(state.answers[q.key]||[])];
+  if(a.includes(v)) a = a.filter(x=>x!==v);
+  else if(v==="any") a = ["any"];
+  else a = [...a.filter(x=>x!=="any"), v];
+  state.answers[q.key]=a; renderQ();
+});
+$("#qBack").onclick = () => { if(state.qi===0) show("v-home"); else { state.qi--; renderQ(); } };
+$("#qNext").onclick = nextQ;
+function nextQ(){
+  if(state.qi < QUESTIONS.length-1){ state.qi++; renderQ(); return; }
+  if(state.mode==="group") createRoom(); else showResults();
+}
+
+/* ---------- Risultati ---------- */
+function filmCard(x){
+  const f=x.f;
+  return `<article class="fcard">
+    <div class="poster" style="--h:${hueOf(f)}" aria-hidden="true">${esc(f.t.split(" - ")[0])}</div>
+    <div class="fbody">
+      <h3>${esc(f.t)}</h3>
+      <div class="meta">${metaLine(f,false)}</div>
+      <p>${esc(f.b)}</p>
+      <div class="chips">${(x.why||[]).slice(0,3).map(w=>`<span class="chip">${esc(w)}</span>`).join("")}</div>
+      <div class="where"><span class="platform">${esc(whereText(f))}</span><a class="jw" href="${jwUrl(f)}" target="_blank" rel="noopener">Dove vederlo ↗</a></div>
+    </div></article>`;
+}
+function showResults(){ state.ranked = rank(state.answers); state.offset=20; $("#resNick").value = $("#nickInput").value; renderResults(); show("v-results"); }
+function renderResults(){
+  $("#resChips").innerHTML = answerChips(state.answers);
+  $("#resCount").textContent = `${state.offset} proposte, dalla più adatta`;
+  $("#resList").innerHTML = state.ranked.slice(0, state.offset).map(filmCard).join("");
+  $("#resMore").hidden = state.offset >= 50;
+}
+$("#resMore").onclick = () => { state.offset = Math.min(state.offset+10, 50); renderResults(); };
+$("#resRedo").onclick = () => startQuiz("solo");
+$("#resToGroup").onclick = () => {
+  const v = $("#resNick").value.replace(/\s+/g," ").trim();
+  if(!v){ $("#resErr").textContent = "Scrivi il tuo soprannome: è il nome che vedranno gli altri."; $("#resErr").hidden = false; $("#resNick").focus(); return; }
+  $("#nickInput").value = v; state.mode = "group"; createRoom();
+};
+$("#resNick").addEventListener("input", () => { $("#resErr").hidden = true; });
+
+/* ---------- Serate di gruppo (Supabase) ---------- */
+const SB_BASE = SUPABASE_URL.trim().replace(/\/+$/, "").replace(/\/(rest|auth|realtime)\/v1$/, "");
+const configured = /^https:\/\/[^/]+$/.test(SB_BASE) && SUPABASE_KEY && !/^INSERISCI/.test(SUPABASE_KEY);
+let sb = null;
+try{
+  if(configured && window.supabase) sb = window.supabase.createClient(SB_BASE, SUPABASE_KEY, {auth:{persistSession:true, autoRefreshToken:true}});
+}catch(e){ sb = null; }
+
+function refreshGroupUI(){
+  const note = $("#groupNote");
+  const msg = sb ? "" : (configured
+    ? "Non riesco a caricare il servizio delle serate di gruppo. Controlla la connessione e ricarica la pagina."
+    : "Le serate di gruppo si attivano collegando il database: segui GUIDA-DATABASE.md e inserisci URL e chiave in cima a index.html.");
+  note.textContent = msg; note.hidden = !msg;
+  const off = !sb;
+  $("#goGroup").disabled = off; $("#joinBtn").disabled = off; $("#codeInput").disabled = off; $("#nickInput").disabled = off;
+  $("#resToGroup").hidden = off;
+}
+
+/* soprannome */
+$("#nickInput").value = load("cg_nick") || "";
+$("#nickInput").addEventListener("input", () => { $("#joinErr").hidden = true; });
+function getNick(){
+  const v = $("#nickInput").value.replace(/\s+/g," ").trim().slice(0,24);
+  if(!v){
+    show("v-home"); joinError("Scrivi il tuo soprannome: è il nome che vedranno gli altri.");
+    $("#nickInput").focus(); return null;
+  }
+  store("cg_nick", v); return v;
+}
+
+function errMsg(e){
+  const m = String((e && (e.message || e.error_description || e.msg)) || e || "");
+  if(m.includes("room_not_found")) return "Nessuna serata con questo codice. Controlla le lettere.";
+  if(m.includes("room_started")) return "La votazione di questa serata è già iniziata.";
+  if(m.includes("room_full")) return "Questa serata è al completo (30 persone).";
+  if(m.includes("nickname_required")) return "Scrivi il tuo soprannome.";
+  if(m.includes("cannot_start")) return "Solo chi ha creato la serata può avviare il voto.";
+  if(/anonymous/i.test(m) && /(disabled|not enabled)/i.test(m)) return "Nel progetto Supabase l'accesso anonimo è spento: attivalo in Authentication → Sign In / Providers.";
+  if(/rate limit|too many/i.test(m)) return "Troppi accessi da questa rete in poco tempo. Riprova tra qualche minuto.";
+  if(/fetch|network|load failed/i.test(m)) return "Connessione non riuscita. Controlla internet e riprova.";
+  return "Qualcosa non ha funzionato. Riprova tra poco.";
+}
+
+async function ensureAuth(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session){ state.uid = session.user.id; return; }
+  const { data, error } = await sb.auth.signInAnonymously();
+  if(error) throw error;
+  state.uid = data.user.id;
+}
+
+/* ---------- Catalogo aggiornato ogni settimana (catalogo.json) ---------- */
+async function loadCatalog(){
+  try{
+    const r = await fetch("catalogo.json", {cache:"no-cache"});
+    if(!r.ok) return;
+    const j = await r.json();
+    const blocks = Array.isArray(j.aggiornamenti) ? j.aggiornamenti : [j];
+    let n = 0;
+    blocks.forEach(b => {
+      if(!b || typeof b!=="object") return;
+      if(Array.isArray(b.films)) b.films.slice(0,500).forEach(row => { if(Array.isArray(row) && addFilm(row)) n++; });
+      if(Array.isArray(b.where)) b.where.slice(0,500).forEach(x => {
+        if(!Array.isArray(x)) return; const f = BYID[slug(String(x[0]))+"-"+x[1]]; const w = String(x[2]||"");
+        if(f && (w==="" || WHERE[w])){ f.w = w; f.v = !!w; }
+      });
+    });
+    if(n){ $("#homeEyebrow").textContent = `Sala buia · ${FILMS.length} film in programmazione`; if(state.code) routeRoom(); }
+  }catch(e){ /* nessun aggiornamento: resta il catalogo integrato */ }
+}
+
+/* ---------- Creare, entrare, uscire ---------- */
+async function createRoom(){
+  if(!sb){ refreshGroupUI(); show("v-home"); return; }
+  const nick = getNick(); if(!nick) return;
+  loading("Preparo la serata e scelgo 30 film…");
+  try{
+    await ensureAuth();
+    const films = rank(state.answers).slice(0,30).map(x => x.f.id);
+    const { data, error } = await sb.rpc("create_room", {p_films:films, p_answers:state.answers, p_nickname:nick});
+    if(error) throw error;
+    enterRoom(String(data));
+  }catch(e){ show("v-home"); toast(errMsg(e)); }
+}
+
+async function joinRoom(code){
+  if(!sb){ refreshGroupUI(); return; }
+  const nick = getNick(); if(!nick) return;
+  $("#joinBtn").disabled = true;
+  try{
+    await ensureAuth();
+    const { error } = await sb.rpc("join_room", {p_code:code, p_nickname:nick});
+    if(error) throw error;
+    $("#codeInput").value = "";
+    enterRoom(code);
+  }catch(e){ joinError(errMsg(e)); }
+  finally{ $("#joinBtn").disabled = false; }
+}
+
+async function resume(code){
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session) { store("cg_room", null); return; }
+    state.uid = session.user.id;
+    const { data, error } = await sb.from("rooms").select("code").eq("code", code).maybeSingle();
+    if(error || !data){ store("cg_room", null); return; }
+    if(state.view==="v-home") enterRoom(code);
+  }catch(e){}
+}
+
+function enterRoom(code){
+  stopSubs();
+  Object.assign(state, {code, room:null, members:[], myVotes:{}, votesLoaded:false, shownFilm:null, dirty:false});
+  store("cg_room", code);
+  $("#roomChip").textContent = code; $("#roomChip").hidden = false;
+  loading("Entro in sala…");
+  state.channel = sb.channel("serata-" + code)
+    .on("postgres_changes", {event:"*", schema:"public", table:"rooms",   filter:"code=eq." + code},      () => refreshRoom())
+    .on("postgres_changes", {event:"*", schema:"public", table:"members", filter:"room_code=eq." + code}, () => refreshRoom())
+    .subscribe(status => { if(status==="SUBSCRIBED") refreshRoom(); });
+  /* rete di sicurezza: se il tempo reale si interrompe, ricontrolla ogni 12 secondi */
+  state.poll = setInterval(refreshRoom, 12000);
+  refreshRoom();
+}
+document.addEventListener("visibilitychange", () => { if(!document.hidden && state.code) refreshRoom(); });
+
+function stopSubs(){
+  if(state.channel){ try{ sb.removeChannel(state.channel); }catch(e){} state.channel = null; }
+  if(state.poll){ clearInterval(state.poll); state.poll = null; }
+}
+function leaveRoom(){
+  stopSubs();
+  Object.assign(state, {code:null, room:null, members:[], myVotes:{}, votesLoaded:false, shownFilm:null});
+  store("cg_room", null); $("#roomChip").hidden = true;
+}
+$("#leaveLobby").onclick = async () => {
+  const code = state.code;
+  leaveRoom(); show("v-home");
+  try{ await sb.rpc("leave_room", {p_code:code}); }catch(e){}
+};
+$("#newNight").onclick = () => { leaveRoom(); show("v-home"); };
+
+let refreshing = false, refreshAgain = false;
+async function refreshRoom(){
+  if(!state.code) return;
+  if(refreshing){ refreshAgain = true; return; }
+  refreshing = true;
+  try{
+    do{
+      refreshAgain = false;
+      const code = state.code;
+      const [r, m] = await Promise.all([
+        sb.from("rooms").select("code,host,status,films,answers,match,unanimous").eq("code", code).maybeSingle(),
+        sb.from("members").select("user_id,nickname,votes,joined_at").eq("room_code", code).order("joined_at")
+      ]);
+      if(code !== state.code) return;
+      if(r.error) throw r.error;
+      if(m.error) throw m.error;
+      if(!r.data){ leaveRoom(); show("v-home"); toast("Questa serata non esiste più."); return; }
+      state.room = r.data;
+      state.members = (m.data||[]).map(x => ({uid:x.user_id, nick:x.nickname, votes:x.votes||{}}));
+      if(!state.votesLoaded){
+        const me = state.members.find(x => x.uid===state.uid);
+        if(!me){ leaveRoom(); show("v-home"); joinError("Non fai parte di questa serata."); return; }
+        state.myVotes = {...me.votes}; state.votesLoaded = true;
+      }
+      routeRoom();
+    } while(refreshAgain);
+  }catch(e){ toast(errMsg(e)); }
+  finally{ refreshing = false; }
+}
+
+const votesOf = m => m.uid===state.uid ? state.myVotes : (m.votes||{});
+const votedCount = m => state.room ? state.room.films.filter(id => id in votesOf(m)).length : 0;
+
+function routeRoom(){
+  const r = state.room; if(!r) return;
+  if(r.status==="lobby") renderLobby();
+  else if(r.status==="voting"){ if(nextFilm()) renderVote(); else renderWait(); }
+  else if(r.status==="done") renderMatch();
+}
+
+/* ---------- Persone ---------- */
+function avatar(m){
+  const s = document.createElement("span"); s.className = "av";
+  let h = 0; for(const c of m.uid) h = (h*31 + c.charCodeAt(0)) % 360;
+  s.style.setProperty("--ah", h);
+  s.textContent = (m.nick||"?").trim().charAt(0).toUpperCase();
+  return s;
+}
+function personName(m){ return m.uid===state.uid ? `${m.nick} (tu)` : m.nick; }
+function renderPeople(el, mode){
+  const total = state.room ? state.room.films.length : 30;
+  el.replaceChildren(...state.members.map(m => {
+    if(mode==="mini"){
+      const d = document.createElement("span"); d.className = "mp";
+      const t = document.createElement("span"); t.textContent = `${m.nick} ${votedCount(m)}/${total}`;
+      d.append(avatar(m), t); return d;
+    }
+    const row = document.createElement("div"); row.className = "person";
+    const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = personName(m);
+    const tag = document.createElement("span"); tag.className = "tag";
+    if(mode==="lobby") tag.textContent = m.uid===state.room.host ? "organizza" : "pronto";
+    else { const n = votedCount(m); tag.textContent = n>=total ? "finito" : `${n}/${total}`; if(n>=total) tag.classList.add("ok"); }
+    row.append(avatar(m), nm, tag); return row;
+  }));
+}
+
+/* ---------- Sala d'attesa ---------- */
+const inviteUrl = () => location.origin + location.pathname + "?codice=" + state.code;
+function renderLobby(){
+  const r = state.room;
+  $("#lobbyCode").textContent = state.code;
+  $("#lobbyChips").innerHTML = answerChips(r.answers||{});
+  $("#lobbyCount").textContent = `In sala · ${state.members.length} ${state.members.length===1?"persona":"persone"}`;
+  const host = r.host===state.uid;
+  $("#startVote").hidden = !host; $("#lobbyWait").hidden = host;
+  $("#startVote").textContent = state.members.length<2 ? "Inizia anche da solo" : `Inizia la votazione con ${state.members.length}`;
+  renderPeople($("#lobbyPeople"), "lobby");
+  show("v-lobby");
+}
+async function copyText(text, okMsg, el){
+  try{ await navigator.clipboard.writeText(text); toast(okMsg); }
+  catch(e){
+    if(el){ const sel=window.getSelection(), rg=document.createRange(); rg.selectNodeContents(el); sel.removeAllRanges(); sel.addRange(rg); }
+    toast("Copia non riuscita: selezionalo e copialo a mano.");
+  }
+}
+$("#copyCode").onclick = () => copyText(state.code, "Codice copiato", $("#lobbyCode"));
+$("#copyInvite").onclick = async () => {
+  const url = inviteUrl();
+  if(navigator.share){ try{ await navigator.share({title:"Cosa Guardiamo", text:`Entra nella serata ${state.code} e vota il film di stasera`, url}); return; }catch(e){ if(e && e.name==="AbortError") return; } }
+  copyText(url, "Invito copiato: incollalo nel gruppo", null);
+};
+$("#startVote").onclick = async () => {
+  $("#startVote").disabled = true;
+  try{ const { error } = await sb.rpc("start_room", {p_code:state.code}); if(error) throw error; refreshRoom(); }
+  catch(e){ toast(errMsg(e)); }
+  finally{ $("#startVote").disabled = false; }
+};
+
+/* ---------- Voto ---------- */
+function nextFilm(){ return state.room.films.find(id => !(id in state.myVotes)) || null; }
+function cardHTML(f, under){
+  return `<div class="card poster${under?" under":""}" style="--h:${hueOf(f)}" data-id="${f.id}">
+    ${under?"":'<span class="stamp yes">SÌ</span><span class="stamp no">NO</span>'}
+    <div class="ctags">${f.moods.slice(0,3).map(m=>`<span>${MOOD[m]}</span>`).join("")}</div>
+    <div class="ctitle">${esc(f.t)}</div>
+    ${f.o?`<div class="orig">${esc(f.o)}</div>`:""}
+    <div class="cmeta">${metaLine(f,true)}</div>
+    <p class="cblurb">${esc(f.b)}</p>
+  </div>`;
+}
+function renderVote(){
+  const films = state.room.films, id = nextFilm(), done = films.filter(x => x in state.myVotes).length;
+  $("#voteCounter").textContent = `${Math.min(done+1, films.length)} / ${films.length}`;
+  $("#voteBar").style.width = (done/films.length*100) + "%";
+  renderPeople($("#votePeople"), "mini");
+  if(state.view!=="v-vote") show("v-vote");
+  if(state.shownFilm===id || state.animating) return;
+  if(!BYID[id]){ $("#stack").innerHTML = '<div class="panel center"><div class="spin"></div><p class="note">Carico il catalogo…</p></div>'; return; }
+  state.shownFilm = id;
+  const nextId = films.find(x => !(x in state.myVotes) && x!==id && BYID[x]);
+  $("#stack").innerHTML = (nextId ? cardHTML(BYID[nextId], true) : "") + cardHTML(BYID[id], false);
+  bindDrag($("#stack .card:not(.under)"));
+}
+function bindDrag(card){
+  let x0 = null, dx = 0;
+  const setO = d => { card.style.setProperty("--yes-o", Math.max(0,Math.min(1,d/110))); card.style.setProperty("--no-o", Math.max(0,Math.min(1,-d/110))); };
+  card.addEventListener("pointerdown", e => { if(state.animating) return; x0 = e.clientX; dx = 0; card.setPointerCapture(e.pointerId); card.classList.add("dragging"); });
+  card.addEventListener("pointermove", e => { if(x0===null) return; dx = e.clientX - x0; card.style.transform = `translateX(${dx}px) rotate(${dx/16}deg)`; setO(dx); });
+  const end = () => { if(x0===null) return; card.classList.remove("dragging"); x0 = null;
+    if(dx>110) castVote(1); else if(dx<-110) castVote(0); else { card.style.transform = ""; setO(0); } };
+  card.addEventListener("pointerup", end); card.addEventListener("pointercancel", end);
+}
+function castVote(v){
+  if(state.view!=="v-vote" || state.animating) return;
+  const id = state.shownFilm; if(!id || id in state.myVotes) return;
+  const card = $("#stack .card:not(.under)");
+  state.myVotes[id] = v; state.dirty = true; flushVotes();
+  state.animating = true;
+  if(card){ card.style.setProperty(v?"--yes-o":"--no-o", 1); card.style.transform = `translateX(${v?140:-140}%) rotate(${v?18:-18}deg)`; card.style.opacity = "0"; }
+  setTimeout(() => { state.animating = false; routeRoom(); }, 230);
+}
+$("#btnYes").onclick = () => castVote(1);
+$("#btnNo").onclick = () => castVote(0);
+document.addEventListener("keydown", e => { if(state.view!=="v-vote") return; if(e.key==="ArrowRight") castVote(1); if(e.key==="ArrowLeft") castVote(0); });
+
+async function flushVotes(){
+  if(state.writing) return; state.writing = true;
+  try{
+    while(state.dirty && state.code){
+      state.dirty = false;
+      const { error } = await sb.from("members").update({votes:{...state.myVotes}}).eq("room_code", state.code).eq("user_id", state.uid);
+      if(error) throw error;
+    }
+  }catch(e){ state.dirty = true; toast(errMsg(e) + " Il voto verrà reinviato al prossimo."); }
+  finally{ state.writing = false; }
+}
+
+function renderWait(){ if(state.dirty && !state.writing) flushVotes(); renderPeople($("#waitPeople"), "wait"); show("v-wait"); }
+
+function renderMatch(){
+  const r = state.room, f = BYID[r.match]; if(!f) return;
+  const yes = state.members.filter(m => votesOf(m)[f.id]===1).length;
+  $("#matchEyebrow").textContent = r.unanimous ? "Tutti d'accordo" : "Nessun film all'unanimità";
+  $("#matchTitle").textContent = r.unanimous ? "Si guarda questo" : "Vince il più votato";
+  $("#matchTicket").innerHTML = `
+    <div class="poster" style="--h:${hueOf(f)}">
+      <div class="ctitle">${esc(f.t)}</div>
+      ${f.o?`<div class="orig" style="opacity:.8;font-style:italic">${esc(f.o)}</div>`:""}
+    </div>
+    <div class="stub">
+      <p style="color:var(--muted)">${esc(f.b)}</p>
+      <dl class="kv">
+        ${f.d?`<dt>Regia</dt><dd>${esc(f.d)}</dd>`:""}
+        <dt>Anno</dt><dd>${f.y}</dd>
+        <dt>Durata</dt><dd>${dur(f.m)}</dd>
+        <dt>Voti</dt><dd>${yes} sì su ${state.members.length}</dd>
+      </dl>
+      <div class="eyebrow">Dove guardarlo</div>
+      <div class="big-where">${esc(whereText(f))}</div>
+      <a class="btn gold" href="${jwUrl(f)}" target="_blank" rel="noopener">Controlla le piattaforme in Italia ↗</a>
+      <p class="note">La disponibilità in streaming cambia spesso: il link mostra dove si trova oggi.</p>
+    </div>`;
+  if(state.view!=="v-match"){ store("cg_room", null); stopSubs(); show("v-match"); }
+}
+
+/* ---------- Avvio ---------- */
+refreshGroupUI();
+loadCatalog();
+(() => {
+  const p = new URLSearchParams(location.search).get("codice");
+  if(p && /^[A-Za-z0-9]{5}$/.test(p)){
+    $("#codeInput").value = p.toUpperCase();
+    if(!$("#nickInput").value) $("#nickInput").focus();
+  }
+  const saved = load("cg_room");
+  if(sb && saved && !p) resume(saved);
+})();
+</script>
+</body>
+</html>

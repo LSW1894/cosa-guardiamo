@@ -1,0 +1,4 @@
+{
+  "info": "Film aggiunti ogni settimana dall'aggiornamento automatico. Ogni blocco: data, films (righe nello stesso formato del catalogo in index.html), where ([titolo, anno, piattaforma] per cambiare piattaforma a un film esistente).",
+  "aggiornamenti": []
+}
