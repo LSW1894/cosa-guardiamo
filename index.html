@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#110e17">
-<meta name="description" content="Rispondi a cinque domande e scopri cosa guardare stasera, da solo o votando con gli amici.">
+<meta name="description" content="Rispondi a sei domande e scopri cosa guardare stasera, da solo o votando con gli amici.">
 <title>Cosa Guardiamo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='10' r='7' fill='none' stroke='%23f4b740' stroke-width='2.4'/%3E%3Ccircle cx='23' cy='10' r='5' fill='none' stroke='%23f4b740' stroke-width='2.4'/%3E%3Crect x='4' y='18' width='18' height='10' rx='2' fill='%23f4b740'/%3E%3Cpath d='M22 21l7-3v10l-7-3z' fill='%23f4b740'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,6 +124,11 @@ p{margin:0}
 .poster::before,.poster::after{content:"";position:absolute;left:0;right:0;height:14px;
   background:repeating-linear-gradient(90deg, transparent 0 6px, rgba(0,0,0,.55) 6px 14px, transparent 14px 20px);opacity:.55}
 .poster::before{top:6px}
+.poster.has-img{background-image:linear-gradient(to top, rgba(10,8,14,.92) 0%, rgba(10,8,14,.55) 38%, rgba(10,8,14,0) 65%), var(--img);
+  background-size:cover;background-position:center top}
+.poster.has-img::before,.poster.has-img::after{opacity:.35}
+.fcard .poster.has-img{background-image:var(--img)}
+.fcard .poster.has-img::before,.fcard .poster.has-img::after{display:none}
 .poster::after{bottom:6px}
 
 /* results */
@@ -166,9 +171,14 @@ p{margin:0}
 .text-input{width:100%;min-width:0;font-size:17px;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
 .text-input:focus{outline:none;border-color:var(--amber)}
 .field{display:flex;flex-direction:column;gap:8px}
+.group-box{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:var(--r);border:1px dashed var(--line)}
+.group-box .tile{background:var(--surface-2)}
 .field label{font-size:14px;color:var(--muted)}
 .credits{font-size:12.5px;color:var(--dim);text-align:center;margin-top:12px}
 .credits a{color:var(--muted)}
+.credits{display:flex;flex-direction:column;align-items:center;gap:6px}
+.credits p{margin:0;max-width:52ch}
+.tmdb-logo{height:14px;width:auto;opacity:.8}
 .person .nm{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .person .tag{font-family:var(--mono);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
 .person .tag.ok{color:var(--yes)}
@@ -245,24 +255,26 @@ p{margin:0}
   <section class="view" id="v-home">
     <div class="eyebrow" id="homeEyebrow">Sala buia · film in programmazione</div>
     <h1>Cosa<br>guardiamo<br><em>stasera?</em></h1>
-    <p class="lead">Rispondi a cinque domande, anche con più scelte, e ti propongo i film giusti, comprese le novità in streaming in Italia. Oppure crea una serata di gruppo: tutti votano sì o no, e vince il primo film che piace a tutti.</p>
+    <p class="lead">Rispondi a sei domande, anche con più scelte, e ti propongo i film giusti tra quelli che puoi vedere in Italia, con locandine e piattaforme aggiornate. Oppure crea una serata di gruppo: tutti votano sì o no, e vince il primo film che piace a tutti.</p>
     <div class="tiles">
       <button class="tile primary" id="goSolo" type="button">
         <strong>Scelgo io</strong>
-        <span>Cinque domande, almeno 20 proposte su misura</span>
+        <span>Sei domande, almeno 20 proposte su misura</span>
         <i class="arrow" aria-hidden="true">→</i>
       </button>
+    </div>
+    <div class="group-box">
+      <div class="eyebrow">In gruppo</div>
+      <div class="field">
+        <label for="nickInput">Il tuo soprannome</label>
+        <input class="text-input" id="nickInput" maxlength="24" placeholder="Es. Giulia" autocomplete="nickname">
+      </div>
       <button class="tile" id="goGroup" type="button">
         <strong>Serata di gruppo</strong>
         <span>Crei un codice, gli altri entrano, votate 30 film</span>
         <i class="arrow" aria-hidden="true">→</i>
       </button>
-    </div>
     <form class="join" id="joinForm" autocomplete="off">
-      <div class="field">
-        <label for="nickInput">Il tuo soprannome per le serate di gruppo</label>
-        <input class="text-input" id="nickInput" maxlength="24" placeholder="Es. Giulia" autocomplete="nickname">
-      </div>
       <label for="codeInput">Hai già un codice?</label>
       <div class="join-row">
         <input class="code-input" id="codeInput" maxlength="5" placeholder="ABCDE" inputmode="text" autocapitalize="characters" spellcheck="false">
@@ -271,6 +283,7 @@ p{margin:0}
       <p class="err" id="joinErr" hidden></p>
       <p class="note" id="groupNote" hidden></p>
     </form>
+    </div>
   </section>
 
   <!-- QUIZ -->
@@ -374,7 +387,11 @@ p{margin:0}
     </div>
   </section>
 
-  <p class="credits">Dove vederlo: link a <a href="https://www.justwatch.com/it" target="_blank" rel="noopener">JustWatch</a>. Disponibilità verificate a ottobre 2026, aggiornate ogni settimana.</p>
+  <footer class="credits">
+    <img class="tmdb-logo" src="tmdb-logo.svg" alt="TMDB" onerror="this.remove()">
+    <p>Dati e locandine dei film da <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+    <p>Dati sulle piattaforme di streaming forniti da <a href="https://www.justwatch.com/it" target="_blank" rel="noopener">JustWatch</a>.</p>
+  </footer>
 
   <!-- LOADING -->
   <section class="view" id="v-loading" hidden>
@@ -391,6 +408,8 @@ p{margin:0}
    ===================================================================== */
 const SUPABASE_URL = "https://txcpawjascovosbeumru.supabase.co";
 const SUPABASE_KEY = "sb_publishable_TQHeVbbhr_5eZVejZgtS-Q_KqBvj6w5";
+/* Chiave API v3 di TMDB (themoviedb.org → Impostazioni → API): catalogo dal vivo, locandine, dove vederlo */
+const TMDB_KEY = "ceb84068702180d60096e33886c2cce1";
 
 /* ---------- Catalogo ---------- */
 /* [titolo, titolo originale, anno, regia, minuti, umori, adatto a famiglie, notorietà 0-2, piattaforma, trama breve]
@@ -1068,7 +1087,7 @@ const PATCH = {"interstellar-2014":["N",1],"quasi-amici-2011":["N",1],"storia-di
   "il-signore-degli-anelli-la-compagnia-dell-anello-2001":["N",1],"harry-potter-e-la-pietra-filosofale-2001":["H",0],
   "dune-2021":["H",1],"superman-2025":["H",1],"weapons-2025":["H",1]};
 Object.entries(PATCH).forEach(([id,[w,v]])=>{ if(BYID[id]){ BYID[id].w=w; BYID[id].v=!!v; } });
-const WHERE = {N:"Netflix", P:"Prime Video", D:"Disney+", H:"HBO Max", A:"Apple TV+"};
+const WHERE = {N:"Netflix", P:"Prime Video", D:"Disney+", H:"HBO Max", A:"Apple TV+", W:"NOW"};
 const MOOD = {R:"Da ridere", E:"Emozionante", A:"Adrenalina", B:"Brivido", P:"Fa pensare", S:"Evasione", L:"Romantico"};
 const HUE = {R:42, E:352, A:16, B:278, P:192, S:232, L:322};
 
@@ -1089,7 +1108,10 @@ const QUESTIONS = [
     ["recent","Recenti","dal 2010 in poi"],["any","Indifferente","tutto va bene"]]},
   {key:"pop", q:"Vai sul sicuro o vuoi sorprese?", hint:"Puoi scegliere più risposte.", opts:[
     ["safe","Sul sicuro","film che conoscono tutti"],["mix","Un po' e un po'","un buon equilibrio"],
-    ["gem","Sorprendimi","titoli meno visti"],["new","Novità in streaming","uscite recenti sulle piattaforme"]]}
+    ["gem","Sorprendimi","titoli meno visti"],["new","Novità in streaming","uscite recenti sulle piattaforme"]]},
+  {key:"plat", q:"Quali piattaforme hai?", hint:"Ti propongo solo film che puoi vedere con i tuoi abbonamenti, in Italia.", opts:[
+    ["N","Netflix",""],["P","Prime Video",""],["D","Disney+",""],["H","HBO Max",""],["A","Apple TV+",""],["W","NOW / Sky",""],
+    ["any","Qualsiasi","anche a noleggio o acquisto"]]}
 ];
 
 /* ---------- Punteggio ---------- */
@@ -1122,6 +1144,8 @@ function scoreFilm(f, a, jitter){
   s += pb;
   if(pop.includes("gem") && f.p===0) why.push("Chicca");
   if(f.v) why.push("Novità in streaming");
+  const plat = arr(a.plat);
+  if(plat.length && !plat.includes("any")){ if(f.w && plat.includes(f.w)){ s += 4; why.push("Su " + WHERE[f.w]); } else s -= 3; }
   s += jitter ? Math.random()*2.2 : 0;
   return {f, s, why:[...new Set(why)]};
 }
@@ -1133,8 +1157,15 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">"
 const hueOf = f => { let h = HUE[f.moods[0]]||200; for(const c of f.t) h += c.charCodeAt(0)%7; return h%360; };
 const dur = m => m ? `${Math.floor(m/60)}h ${String(m%60).padStart(2,"0")}′` : "durata n.d.";
 const metaLine = (f, long) => [f.y, long ? dur(f.m) : (f.m ? f.m+"′" : null), f.d || null].filter(Boolean).map(esc).join(" · ");
-const jwUrl = f => "https://www.justwatch.com/it/cerca?q=" + encodeURIComponent(f.t.split(" - ")[0]);
-const whereText = f => !f.w ? "Streaming, noleggio o acquisto" : f.v ? `Su ${WHERE[f.w]} · ottobre 2026` : `Di solito su ${WHERE[f.w]}`;
+const jwUrl = f => (f.prov && f.prov.link) || "https://www.justwatch.com/it/cerca?q=" + encodeURIComponent(f.t.split(" - ")[0]);
+const whereText = f => {
+  if(f.prov){
+    if(f.prov.flat.length) return "Su " + f.prov.flat.join(", ");
+    return f.prov.rent ? "A noleggio o acquisto" : "Al momento non in streaming in Italia";
+  }
+  if(f.tmdb) return "Controllo dove vederlo…";
+  return !f.w ? "Streaming, noleggio o acquisto" : f.v ? `Su ${WHERE[f.w]} · ottobre 2026` : `Di solito su ${WHERE[f.w]}`;
+};
 function store(k,v){ try{ v==null ? localStorage.removeItem(k) : localStorage.setItem(k,v); }catch(e){} }
 function load(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 let toastT; function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,4200); }
@@ -1195,11 +1226,167 @@ function nextQ(){
   if(state.mode==="group") createRoom(); else showResults();
 }
 
+/* ---------- TMDB: catalogo dal vivo, locandine e dove vederlo in Italia ---------- */
+const TMDB_API = "https://api.themoviedb.org/3";
+const TMDB_IMG = "https://image.tmdb.org/t/p/";
+const tmdbOn = /^[0-9a-f]{32}$/i.test(TMDB_KEY);
+/* generi TMDB per ogni "voglia" del quiz */
+const MOOD_GENRES = {R:[35], E:[18,10402,10752], A:[28,12,37], B:[27,53,9648,80], P:[878,36,99,18], S:[14,12,16,878], L:[10749]};
+const GENRE_MOOD = {35:"R",18:"E",10402:"E",10752:"E",28:"A",37:"A",12:"S",53:"B",27:"B",9648:"B",80:"B",878:"S",36:"P",99:"P",14:"S",16:"S",10751:"S",10749:"L"};
+/* piattaforme in Italia (id TMDB, regione IT) */
+const PLAT_IDS = {N:"8", P:"119", D:"337", H:"1899", A:"350", W:"39|29"};
+const PROVIDER_NAMES = [[/prime video/i,"Prime Video"],[/^netflix/i,"Netflix"],[/disney/i,"Disney+"],[/hbo max/i,"HBO Max"],
+  [/^apple tv$/i,"Apple TV+"],[/now tv|^now$/i,"NOW"],[/sky go/i,"Sky Go"],[/rai ?play/i,"RaiPlay"],[/infinity/i,"Mediaset Infinity"],
+  [/paramount/i,"Paramount+"],[/timvision/i,"Timvision"]];
+const provName = n => { for(const [re,v] of PROVIDER_NAMES) if(re.test(n)) return v; return n.replace(/ with ads| amazon channel| standard/ig,"").trim(); };
+
+async function tmdb(path, params={}){
+  const u = new URL(TMDB_API + path);
+  u.searchParams.set("api_key", TMDB_KEY);
+  for(const [k,v] of Object.entries(params)) if(v!==undefined && v!==null && v!=="") u.searchParams.set(k, v);
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 9000);
+  try{
+    const r = await fetch(u, {signal:ctl.signal});
+    if(!r.ok) throw new Error("tmdb_" + r.status);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+
+/* trasforma un risultato TMDB in un film dell'app */
+function fromTmdb(x){
+  const id = "tmdb:" + x.id;
+  const genres = x.genre_ids || (x.genres||[]).map(g => g.id);
+  const moods = [...new Set(genres.map(g => GENRE_MOOD[g]).filter(Boolean))];
+  const f = BYID[id] || {id, d:"", m:0, w:"", v:false};
+  Object.assign(f, {
+    tmdb: x.id, t: x.title || x.original_title || "", o: (x.original_title && x.original_title!==x.title) ? x.original_title : "",
+    y: Number((x.release_date||"").slice(0,4)) || 0, moods: moods.length ? moods : ["E"],
+    k: genres.includes(16) || genres.includes(10751), p: x.vote_count>5000 ? 2 : x.vote_count>800 ? 1 : 0,
+    b: (x.overview||"").length > 200 ? x.overview.slice(0,197).replace(/\s+\S*$/,"") + "…" : (x.overview || "Trama non disponibile in italiano."),
+    poster: x.poster_path || f.poster || "", vote: x.vote_average || 0, genres
+  });
+  if(!BYID[id]){ BYID[id] = f; }
+  return f;
+}
+function applyDetails(f, d){
+  fromTmdb(d);
+  f.m = d.runtime || 0;
+  const dir = ((d.credits||{}).crew||[]).filter(c => c.job==="Director").map(c => c.name);
+  f.d = dir.slice(0,2).join(", ");
+  const it = ((d["watch/providers"]||{}).results||{}).IT || {};
+  f.prov = {
+    flat: [...new Set([...(it.flatrate||[]), ...(it.free||[]), ...(it.ads||[])].map(p => provName(p.provider_name)))].slice(0,4),
+    rent: !!((it.rent||[]).length || (it.buy||[]).length),
+    link: it.link || ""
+  };
+  f.detailed = true;
+}
+const detailJobs = {};
+function ensureDetails(id){
+  const f = BYID[id];
+  if(!String(id).startsWith("tmdb:")) return Promise.resolve(f || null);
+  if(f && f.detailed) return Promise.resolve(f);
+  if(detailJobs[id]) return detailJobs[id];
+  const tid = id.slice(5);
+  const ck = "cg_tmdb_" + tid;
+  try{
+    const c = JSON.parse(load(ck) || "null");
+    if(c && Date.now() - c.ts < 3*864e5){ const g = BYID[id] || {id}; BYID[id] = g; applyDetails(g, c.d); return Promise.resolve(g); }
+  }catch(e){}
+  if(!tmdbOn) return Promise.resolve(f || null);
+  detailJobs[id] = tmdb(`/movie/${tid}`, {language:"it-IT", append_to_response:"watch/providers,credits"})
+    .then(d => {
+      const keep = {id:d.id, title:d.title, original_title:d.original_title, release_date:d.release_date, overview:d.overview,
+        poster_path:d.poster_path, vote_average:d.vote_average, vote_count:d.vote_count, genres:d.genres, runtime:d.runtime,
+        credits:{crew:((d.credits||{}).crew||[]).filter(c=>c.job==="Director").map(c=>({job:c.job,name:c.name}))},
+        "watch/providers":{results:{IT:((d["watch/providers"]||{}).results||{}).IT||{}}}};
+      try{ store(ck, JSON.stringify({ts:Date.now(), d:keep})); }catch(e){}
+      const g = BYID[id] || {id}; BYID[id] = g; applyDetails(g, keep); return g;
+    })
+    .catch(() => BYID[id] || null)
+    .finally(() => { delete detailJobs[id]; });
+  return detailJobs[id];
+}
+
+/* dalle risposte del quiz alle ricerche su TMDB */
+function tmdbQueries(a){
+  const moods = arr(a.mood), who = arr(a.who), time = arr(a.time), era = arr(a.era), pop = arr(a.pop), plat = arr(a.plat);
+  const base = {language:"it-IT", region:"IT", include_adult:"false", include_video:"false", "with_runtime.gte":60};
+  const g = [...new Set(moods.flatMap(m => MOOD_GENRES[m]||[]))];
+  let genres = g.join("|");
+  if(who.includes("famiglia")){ genres = (genres ? genres + "," : "") + "16|10751"; base.without_genres = "27,53"; }
+  if(genres) base.with_genres = genres;
+  if(!time.includes("any") && time.length) base["with_runtime.lte"] = time.includes("medium") ? 142 : 112;
+  if(plat.length && !plat.includes("any")){
+    base.watch_region = "IT";
+    base.with_watch_providers = plat.map(p => PLAT_IDS[p]).filter(Boolean).join("|");
+    base.with_watch_monetization_types = "flatrate|free|ads";
+  }
+  const year = new Date().getFullYear();
+  let eras = [];
+  if(!era.length || era.includes("any")) eras = [[null,null]];
+  else {
+    if(era.includes("classic")) eras.push([null, "1989-12-31"]);
+    if(era.includes("mid")) eras.push(["1990-01-01","2009-12-31"]);
+    if(era.includes("recent")) eras.push(["2010-01-01", null]);
+  }
+  const styles = [];
+  const P = pop.length ? pop : ["mix"];
+  if(P.includes("safe")) styles.push({sort_by:"popularity.desc", "vote_count.gte":800});
+  if(P.includes("mix")) styles.push({sort_by:"vote_average.desc", "vote_count.gte":1500});
+  if(P.includes("gem")) styles.push({sort_by:"vote_average.desc", "vote_count.gte":150, "vote_count.lte":2500});
+  if(P.includes("new")) styles.push({sort_by:"popularity.desc", "vote_count.gte":20, "primary_release_date.gte":`${year-2}-01-01`,
+    watch_region:"IT", with_watch_monetization_types: base.with_watch_monetization_types || "flatrate|free|ads", _new:true});
+  const qs = [];
+  for(const s of styles){
+    const ers = s._new ? [[null,null]] : eras;
+    for(const [from,to] of ers){
+      const q = {...base, ...s}; delete q._new;
+      if(from) q["primary_release_date.gte"] = q["primary_release_date.gte"] && q["primary_release_date.gte"] > from ? q["primary_release_date.gte"] : from;
+      if(to) q["primary_release_date.lte"] = to;
+      if(!q["primary_release_date.lte"]) q["primary_release_date.lte"] = new Date().toISOString().slice(0,10);
+      qs.push(q);
+    }
+  }
+  return qs.slice(0,8);
+}
+async function tmdbCandidates(a, want=60){
+  const qs = tmdbQueries(a);
+  const pages = qs.length > 4 ? [1,2] : [1,2,3];
+  const lists = await Promise.all(qs.map(q => Promise.all(pages.map(p => tmdb("/discover/movie", {...q, page:p}).catch(() => ({results:[]}))))
+    .then(rs => rs.flatMap(r => r.results||[]))));
+  /* alterna i risultati delle varie ricerche, senza doppioni */
+  const seen = new Set(), out = [];
+  for(let i=0; out.length < want; i++){
+    let any = false;
+    for(const l of lists){ const x = l[i]; if(!x) continue; any = true;
+      if(seen.has(x.id) || !x.poster_path) continue; seen.add(x.id); out.push(x); if(out.length>=want) break; }
+    if(!any) break;
+  }
+  const moods = arr(a.mood);
+  return out.map(x => {
+    const f = fromTmdb(x);
+    const why = moods.filter(m => f.moods.includes(m) || (MOOD_GENRES[m]||[]).some(g => f.genres.includes(g))).map(m => MOOD[m]);
+    if(f.vote) why.push("★ " + f.vote.toFixed(1));
+    return {f, s:0, why};
+  });
+}
+/* film da proporre: TMDB se raggiungibile, altrimenti il catalogo integrato */
+async function getCandidates(a){
+  if(tmdbOn){
+    try{ const c = await tmdbCandidates(a); if(c.length >= 20) { state.source = "tmdb"; return c; } }catch(e){}
+  }
+  state.source = "local";
+  return rank(a);
+}
+const posterUrl = (f, size) => f.poster ? TMDB_IMG + (size||"w342") + f.poster : "";
+const posterStyle = (f, size) => f.poster ? `--h:${hueOf(f)};--img:url('${posterUrl(f,size)}')` : `--h:${hueOf(f)}`;
+
 /* ---------- Risultati ---------- */
 function filmCard(x){
   const f=x.f;
-  return `<article class="fcard">
-    <div class="poster" style="--h:${hueOf(f)}" aria-hidden="true">${esc(f.t.split(" - ")[0])}</div>
+  return `<article class="fcard" data-id="${esc(f.id)}">
+    <div class="poster${f.poster?" has-img":""}" style="${posterStyle(f,"w342")}" aria-hidden="true">${f.poster?"":esc(f.t.split(" - ")[0])}</div>
     <div class="fbody">
       <h3>${esc(f.t)}</h3>
       <div class="meta">${metaLine(f,false)}</div>
@@ -1208,14 +1395,24 @@ function filmCard(x){
       <div class="where"><span class="platform">${esc(whereText(f))}</span><a class="jw" href="${jwUrl(f)}" target="_blank" rel="noopener">Dove vederlo ↗</a></div>
     </div></article>`;
 }
-function showResults(){ state.ranked = rank(state.answers); state.offset=20; $("#resNick").value = $("#nickInput").value; renderResults(); show("v-results"); }
-function renderResults(){
-  $("#resChips").innerHTML = answerChips(state.answers);
-  $("#resCount").textContent = `${state.offset} proposte, dalla più adatta`;
-  $("#resList").innerHTML = state.ranked.slice(0, state.offset).map(filmCard).join("");
-  $("#resMore").hidden = state.offset >= 50;
+async function showResults(){
+  loading(tmdbOn ? "Cerco i film adatti a te…" : "Scelgo i film…");
+  state.ranked = await getCandidates(state.answers); state.rankedFor = state.answers; state.offset = 20;
+  $("#resNick").value = $("#nickInput").value; renderResults(); show("v-results");
 }
-$("#resMore").onclick = () => { state.offset = Math.min(state.offset+10, 50); renderResults(); };
+function renderResults(){
+  const max = Math.min(state.ranked.length, 60);
+  $("#resChips").innerHTML = answerChips(state.answers);
+  $("#resCount").textContent = `${Math.min(state.offset,max)} proposte, dalla più adatta` + (state.source==="tmdb" ? " · catalogo TMDB aggiornato in tempo reale" : "");
+  const shown = state.ranked.slice(0, state.offset);
+  $("#resList").innerHTML = shown.map(filmCard).join("");
+  $("#resMore").hidden = state.offset >= max;
+  /* completa durata, regia e piattaforme man mano che arrivano */
+  shown.forEach(x => { if(x.f.tmdb && !x.f.detailed) ensureDetails(x.f.id).then(() => {
+    const el = document.querySelector(`#resList .fcard[data-id="${CSS.escape(x.f.id)}"]`); if(el) el.outerHTML = filmCard(x);
+  }); });
+}
+$("#resMore").onclick = () => { state.offset = Math.min(state.offset+10, 60); renderResults(); };
 $("#resRedo").onclick = () => startQuiz("solo");
 $("#resToGroup").onclick = () => {
   const v = $("#resNick").value.replace(/\s+/g," ").trim();
@@ -1303,7 +1500,8 @@ async function createRoom(){
   loading("Preparo la serata e scelgo 30 film…");
   try{
     await ensureAuth();
-    const films = rank(state.answers).slice(0,30).map(x => x.f.id);
+    const cands = (state.rankedFor === state.answers && state.ranked.length >= 30) ? state.ranked : await getCandidates(state.answers);
+    const films = cands.slice(0,30).map(x => x.f.id);
     const { data, error } = await sb.rpc("create_room", {p_films:films, p_answers:state.answers, p_nickname:nick});
     if(error) throw error;
     enterRoom(String(data));
@@ -1469,7 +1667,7 @@ $("#startVote").onclick = async () => {
 /* ---------- Voto ---------- */
 function nextFilm(){ return state.room.films.find(id => !(id in state.myVotes)) || null; }
 function cardHTML(f, under){
-  return `<div class="card poster${under?" under":""}" style="--h:${hueOf(f)}" data-id="${f.id}">
+  return `<div class="card poster${under?" under":""}${f.poster?" has-img":""}" style="${posterStyle(f,"w500")}" data-id="${esc(f.id)}">
     ${under?"":'<span class="stamp yes">SÌ</span><span class="stamp no">NO</span>'}
     <div class="ctags">${f.moods.slice(0,3).map(m=>`<span>${MOOD[m]}</span>`).join("")}</div>
     <div class="ctitle">${esc(f.t)}</div>
@@ -1485,8 +1683,15 @@ function renderVote(){
   renderPeople($("#votePeople"), "mini");
   if(state.view!=="v-vote") show("v-vote");
   if(state.shownFilm===id || state.animating) return;
-  if(!BYID[id]){ $("#stack").innerHTML = '<div class="panel center"><div class="spin"></div><p class="note">Carico il catalogo…</p></div>'; return; }
+  if(!BYID[id] || (String(id).startsWith("tmdb:") && !BYID[id].t)){
+    $("#stack").innerHTML = '<div class="panel center"><div class="spin"></div><p class="note">Carico il film…</p></div>';
+    ensureDetails(id).then(() => { if(state.view==="v-vote" && nextFilm()===id){ state.shownFilm = null; routeRoom(); } });
+    return;
+  }
   state.shownFilm = id;
+  /* scheda completa del film attuale e dei prossimi */
+  ensureDetails(id).then(f => { if(f && state.shownFilm===id){ const c = $("#stack .card:not(.under) .cmeta"); if(c) c.innerHTML = metaLine(f,true); } });
+  films.filter(x => !(x in state.myVotes)).slice(1,4).forEach(x => ensureDetails(x));
   const nextId = films.find(x => !(x in state.myVotes) && x!==id && BYID[x]);
   $("#stack").innerHTML = (nextId ? cardHTML(BYID[nextId], true) : "") + cardHTML(BYID[id], false);
   bindDrag($("#stack .card:not(.under)"));
@@ -1528,12 +1733,17 @@ async function flushVotes(){
 function renderWait(){ if(state.dirty && !state.writing) flushVotes(); renderPeople($("#waitPeople"), "wait"); show("v-wait"); }
 
 function renderMatch(){
-  const r = state.room, f = BYID[r.match]; if(!f) return;
+  const r = state.room, f = BYID[r.match];
+  if(!f || (f.tmdb && !f.detailed)){
+    if(!f || !f.t){ loading("Ecco il film…"); }
+    ensureDetails(r.match).then(g => { if(g && state.room===r){ g.detailed = true; renderMatch(); } });
+    if(!f || !f.t) return;
+  }
   const yes = state.members.filter(m => votesOf(m)[f.id]===1).length;
   $("#matchEyebrow").textContent = r.unanimous ? "Tutti d'accordo" : "Nessun film all'unanimità";
   $("#matchTitle").textContent = r.unanimous ? "Si guarda questo" : "Vince il più votato";
   $("#matchTicket").innerHTML = `
-    <div class="poster" style="--h:${hueOf(f)}">
+    <div class="poster${f.poster?" has-img":""}" style="${posterStyle(f,"w780")}">
       <div class="ctitle">${esc(f.t)}</div>
       ${f.o?`<div class="orig" style="opacity:.8;font-style:italic">${esc(f.o)}</div>`:""}
     </div>
@@ -1542,13 +1752,14 @@ function renderMatch(){
       <dl class="kv">
         ${f.d?`<dt>Regia</dt><dd>${esc(f.d)}</dd>`:""}
         <dt>Anno</dt><dd>${f.y}</dd>
+        ${f.vote?`<dt>Voto TMDB</dt><dd>★ ${f.vote.toFixed(1)}</dd>`:""}
         <dt>Durata</dt><dd>${dur(f.m)}</dd>
         <dt>Voti</dt><dd>${yes} sì su ${state.members.length}</dd>
       </dl>
       <div class="eyebrow">Dove guardarlo</div>
       <div class="big-where">${esc(whereText(f))}</div>
       <a class="btn gold" href="${jwUrl(f)}" target="_blank" rel="noopener">Controlla le piattaforme in Italia ↗</a>
-      <p class="note">La disponibilità in streaming cambia spesso: il link mostra dove si trova oggi.</p>
+      <p class="note">${f.prov ? "Disponibilità in Italia aggiornata oggi, dati JustWatch via TMDB." : "La disponibilità in streaming cambia spesso: il link mostra dove si trova oggi."}</p>
     </div>`;
   if(state.view!=="v-match"){ store("cg_room", null); stopSubs(); show("v-match"); }
 }
